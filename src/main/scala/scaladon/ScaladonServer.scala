@@ -2,11 +2,14 @@ package scaladon
 
 import cats.effect._
 import cats.implicits._
+import cats.~>
+import doobie.free.connection.ConnectionIO
+import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.transactor.Transactor.Aux
 import org.http4s.HttpRoutes
 import org.http4s.server.blaze.BlazeBuilder
-import scaladon.database.AccountDBImpl
+import scaladon.database.DoobieAccountDB
 import scaladon.services.{AccountService, AccountSvcImpl}
 
 object ScaladonServer extends IOApp {
@@ -17,8 +20,13 @@ object ScaladonServer extends IOApp {
     "" // password
   )
 
-  val accountDB: AccountDBImpl[IO] = new AccountDBImpl[IO](xa)
-  val accountService :AccountService[IO] = new AccountSvcImpl[IO](accountDB)
+  implicit val tx: ConnectionIO ~> IO = new ~>[ConnectionIO, IO] {
+    override def apply[A](fa: ConnectionIO[A]): IO[A] =
+      fa.transact(xa)
+  }
+
+  val accountDB     : DoobieAccountDB    = new DoobieAccountDB
+  val accountService: AccountService[IO] = new AccountSvcImpl[IO, ConnectionIO](accountDB)
 
   def run(args: List[String]): IO[ExitCode] =
     ScaladonStream.stream[IO](accountService).compile.drain.as(ExitCode.Success)

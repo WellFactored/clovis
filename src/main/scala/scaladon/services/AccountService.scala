@@ -1,8 +1,8 @@
 package scaladon.services
 
-import cats.Monad
 import cats.data.Nested
 import cats.implicits._
+import cats.{Monad, ~>}
 import scaladon.database.AccountDatabase
 import scaladon.database.rows.{AccountRow, ActorType, RowId}
 import scaladon.entities.{Account, AccountId, Emoji, EntityId}
@@ -11,7 +11,7 @@ trait AccountService[F[_]] {
   def findAccount(id: AccountId): F[Option[Account]]
 }
 
-class AccountSvcImpl[F[_] : Monad](accountDatabase: AccountDatabase[F]) extends AccountService[F] {
+class AccountSvcImpl[F[_] : Monad, G[_]](accountDatabase: AccountDatabase[G])(implicit tx: G ~> F) extends AccountService[F] {
 
   def acct(row: AccountRow): String = {
     row.domain match {
@@ -28,7 +28,7 @@ class AccountSvcImpl[F[_] : Monad](accountDatabase: AccountDatabase[F]) extends 
     type NestedRow[A] = Nested[F, Option, A]
     val F = Monad[F]
 
-    accountDatabase.accountById(toRowId(id)).flatMap {
+    tx(accountDatabase.accountById(toRowId(id))).flatMap {
       case Some(row) =>
         val moved: F[Option[Account]] = row.movedToAccount match {
           case None            => F.pure(None)
