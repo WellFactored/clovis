@@ -3,6 +3,7 @@ val Specs2Version = "4.2.0"
 val LogbackVersion = "1.2.3"
 
 val enumeratumVersion = "1.5.13"
+lazy val doobieVersion = "0.6.0-RC1"
 
 lazy val root = (project in file("."))
   .settings(
@@ -18,7 +19,11 @@ lazy val root = (project in file("."))
       "org.scalatest" %% "scalatest" % "3.0.5" % "test",
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
 
-      "com.beachape" %% "enumeratum" % enumeratumVersion
+      "com.beachape" %% "enumeratum" % enumeratumVersion,
+
+      "org.tpolecat" %% "doobie-core" % doobieVersion,
+      "org.tpolecat" %% "doobie-postgres" % doobieVersion,
+      "org.tpolecat" %% "doobie-specs2" % doobieVersion
     ),
     addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4")

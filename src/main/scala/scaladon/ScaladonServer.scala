@@ -1,21 +1,36 @@
 package scaladon
 
-import cats.effect.{ConcurrentEffect, Effect, ExitCode, IO, IOApp}
+import cats.effect._
 import cats.implicits._
+import doobie.util.transactor.Transactor
+import doobie.util.transactor.Transactor.Aux
 import org.http4s.HttpRoutes
 import org.http4s.server.blaze.BlazeBuilder
+import scaladon.database.AccountDBImpl
+import scaladon.services.{AccountService, AccountSvcImpl}
 
 object ScaladonServer extends IOApp {
+  val xa: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
+    "org.postgresql.Driver", // driver classname
+    "jdbc:postgresql:scaladon", // connect URL (driver-specific)
+    "scaladon", // user
+    "" // password
+  )
+
+  val accountDB: AccountDBImpl[IO] = new AccountDBImpl[IO](xa)
+  val accountService :AccountService[IO] = new AccountSvcImpl[IO](accountDB)
+
   def run(args: List[String]): IO[ExitCode] =
-    ServerStream.stream[IO].compile.drain.as(ExitCode.Success)
+    ScaladonStream.stream[IO](accountService).compile.drain.as(ExitCode.Success)
 }
 
-object ServerStream {
-  def helloWorldRoutes[F[_]: Effect]: HttpRoutes[F] = new ScaladonRoutes[F].routes
+object ScaladonStream {
 
-  def stream[F[_]: ConcurrentEffect]: fs2.Stream[F, ExitCode]=
+  def scaladonRoutes[F[_] : Effect](accountService: AccountService[F]): HttpRoutes[F] = new ScaladonRoutes[F](accountService).routes
+
+  def stream[F[_] : ConcurrentEffect](accountService: AccountService[F]): fs2.Stream[F, ExitCode] =
     BlazeBuilder[F]
       .bindHttp(8080, "0.0.0.0")
-      .mountService(helloWorldRoutes, "/")
+      .mountService(scaladonRoutes(accountService), "/")
       .serve
 }

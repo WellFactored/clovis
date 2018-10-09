@@ -1,10 +1,13 @@
 package scaladon
 
 import cats.effect.Sync
+import cats.implicits._
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
+import scaladon.entities.{Account, EntityId}
+import scaladon.services.AccountService
 
-class AccountsRoutes[F[_] : Sync] extends Http4sDsl[F] {
+class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Http4sDsl[F] {
   val apiRoot: Path = Root / "api" / "v1"
 
   object MaxId extends OptionalQueryParamDecoderMatcher[Long]("max_id")
@@ -18,7 +21,10 @@ class AccountsRoutes[F[_] : Sync] extends Http4sDsl[F] {
   val routes: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case GET -> Root / "api" / "v1" / "accounts" / LongVar(id) =>
-        NotImplemented()
+        accountService.findAccount(EntityId[Account](id)).flatMap {
+          case None          => NotFound()
+          case Some(account) => Ok(account.toString)
+        }
 
       case GET -> Root / "api" / "v1" / "accounts" / "verify_credentials" =>
         NotImplemented()

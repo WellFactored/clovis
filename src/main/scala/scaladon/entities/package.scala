@@ -6,11 +6,11 @@ import java.time.ZonedDateTime
 import enumeratum.EnumEntry.Lowercase
 import enumeratum._
 
-package object models {
+package object entities {
 
-  case class Id[T](id: Long)
+  case class EntityId[T](id: Long)
 
-  type AccountId = Id[Account]
+  type AccountId = EntityId[Account]
 
   case class Account(
     id: AccountId,
@@ -36,7 +36,7 @@ package object models {
 
   case class Application(name: String, website: Option[URL])
 
-  type AttachmentId = Id[Attachment]
+  type AttachmentId = EntityId[Attachment]
   case class Attachment(
     id: AttachmentId,
     _type: String,
@@ -71,7 +71,7 @@ package object models {
 
   case class Error(error: String)
 
-  type FilterId = Id[Filter]
+  type FilterId = EntityId[Filter]
   case class Filter(id: FilterId, phrase: String, context: String, expiresAt: Option[ZonedDateTime], irreversible: Boolean, wholeWord: Boolean)
 
   case class Instance(
@@ -86,15 +86,15 @@ package object models {
   )
 
   // Know as `List` in Mastodon - renamed here for obvious reasons
-  type MembershipListId = Id[MembershipList]
+  type MembershipListId = EntityId[MembershipList]
   case class MembershipList(id: MembershipListId, title: String)
 
   case class Mention(URL: URL, username: String, acct: String, id: AccountId)
 
-  type NotificationId = Id[Notification]
+  type NotificationId = EntityId[Notification]
   case class Notification(id: NotificationId, _type: String, createdAt: ZonedDateTime, account: AccountId, status: Option[StatusId])
 
-  type PushSubscriptionId = Id[PushSubscription]
+  type PushSubscriptionId = EntityId[PushSubscription]
   case class PushSubscription(id: PushSubscriptionId, endpoint: URL, serverKey: String, alerts: Map[String, Boolean])
 
   case class Relationship(
@@ -110,7 +110,7 @@ package object models {
     endorsed: Boolean
   )
 
-  type ReportId = Id[Report]
+  type ReportId = EntityId[Report]
   case class Report(id: ReportId, actionTaken: String)
 
   case class Results(accounts: List[Account], statuses: List[Status], hashtags: List[String])
@@ -127,7 +127,7 @@ package object models {
     case object Direct extends Visibility
   }
 
-  type StatusId = Id[Status]
+  type StatusId = EntityId[Status]
   case class Status(
     id: StatusId,
     uri: URI,
