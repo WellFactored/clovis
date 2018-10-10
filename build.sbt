@@ -4,6 +4,7 @@ val LogbackVersion = "1.2.3"
 
 val enumeratumVersion = "1.5.13"
 lazy val doobieVersion = "0.6.0-RC1"
+val circeVersion = "0.10.0"
 
 lazy val root = (project in file("."))
   .settings(
@@ -14,8 +15,15 @@ lazy val root = (project in file("."))
     scalacOptions ++= Seq("-Ypartial-unification"),
     libraryDependencies ++= Seq(
       "org.http4s" %% "http4s-blaze-server" % Http4sVersion,
+      "org.http4s" %% "http4s-blaze-client" % Http4sVersion,
       "org.http4s" %% "http4s-circe" % Http4sVersion,
       "org.http4s" %% "http4s-dsl" % Http4sVersion,
+
+      // For auto-derivation of JSON codecs
+      "io.circe" %% "circe-generic" % circeVersion,
+      //For string interpolation to JSON model
+      "io.circe" %% "circe-literal" % circeVersion,
+
       "org.scalatest" %% "scalatest" % "3.0.5" % "test",
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
 

@@ -1,11 +1,18 @@
 package scaladon
 
+import java.net.URL
+
 import cats.effect.Sync
 import cats.implicits._
+import io.circe.{Encoder, Json}
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import scaladon.entities.{Account, EntityId}
 import scaladon.services.AccountService
+import org.http4s.circe._
+import io.circe.syntax._
+import io.circe.generic.auto._
+
 
 class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Http4sDsl[F] {
   val apiRoot: Path = Root / "api" / "v1"
@@ -18,12 +25,14 @@ class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Htt
   object ExcludeReplies extends OptionalQueryParamDecoderMatcher[Boolean]("exclude_replies")
   object AccountIds extends OptionalMultiQueryParamDecoderMatcher[String]("id")
 
+  implicit val URLEncoder:Encoder[URL] = Encoder.instance(url => Json.fromString(url.toString))
+
   val routes: HttpRoutes[F] =
     HttpRoutes.of[F] {
       case GET -> Root / "api" / "v1" / "accounts" / LongVar(id) =>
         accountService.findAccount(EntityId[Account](id)).flatMap {
           case None          => NotFound()
-          case Some(account) => Ok(account.toString)
+          case Some(account) => Ok(account.asJson)
         }
 
       case GET -> Root / "api" / "v1" / "accounts" / "verify_credentials" =>
