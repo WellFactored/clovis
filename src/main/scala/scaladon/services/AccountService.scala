@@ -3,7 +3,7 @@ package scaladon.services
 import cats.data.Nested
 import cats.implicits._
 import cats.{Monad, ~>}
-import scaladon.database.AccountDatabase
+import scaladon.database.{AccountDatabase, FollowCounts}
 import scaladon.database.rows.{AccountRow, ActorType, RowId}
 import scaladon.entities.{Account, AccountId, Emoji, EntityId}
 
@@ -28,9 +28,11 @@ class AccountSvcImpl[F[_] : Monad, G[_]](accountDatabase: AccountDatabase[G])(im
     type NestedRow[A] = Nested[F, Option, A]
     val F = Monad[F]
 
-    tx(accountDatabase.accountById(toRowId(id))).flatMap {
-      case Some(row) =>
-        val moved: F[Option[Account]] = row.movedToAccount match {
+    val result: F[Option[(AccountRow, FollowCounts)]] = tx(accountDatabase.accountWithFollows(toRowId(id)))
+
+    result.flatMap {
+      case Some((acc, fs)) =>
+        val moved: F[Option[Account]] = acc.movedToAccount match {
           case None            => F.pure(None)
           case Some(movedToId) => findAccount(toEntityId(movedToId))
         }
@@ -38,24 +40,24 @@ class AccountSvcImpl[F[_] : Monad, G[_]](accountDatabase: AccountDatabase[G])(im
         moved.map { m =>
           Some(
             Account(
-              EntityId[Account](row.id.id),
-              row.username, acct(row),
-              row.displayName,
-              row.locked,
-              row.createdAt,
-              row.followersCount,
-              row.followingCount,
-              row.statusesCount,
-              row.note,
-              row.url,
-              row.avatar,
-              row.avatarStatic,
-              row.header,
-              row.headerStatic,
+              EntityId[Account](acc.id.id),
+              acc.username, acct(acc),
+              acc.displayName,
+              acc.locked,
+              acc.createdAt,
+              fs.followers,
+              fs.following,
+              0,
+              acc.note,
+              acc.url,
+              acc.avatar,
+              acc.avatarStatic,
+              acc.header,
+              acc.headerStatic,
               List.empty[Emoji],
               m.map(_.acct),
               None,
-              Some(row.actorType == ActorType.Service)
+              Some(acc.actorType == ActorType.Service)
             )
           )
         }

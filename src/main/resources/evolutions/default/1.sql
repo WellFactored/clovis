@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS "follow";
+DROP TABLE IF EXISTS "account";
 
 CREATE TABLE "account" (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
@@ -6,9 +8,6 @@ CREATE TABLE "account" (
   "display_name" VARCHAR NOT NULL,
   "locked" BOOLEAN NOT NULL DEFAULT FALSE,
   "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
-  "followers_count" INTEGER  NOT NULL DEFAULT 0,
-  "following_count" INTEGER  NOT NULL DEFAULT 0,
-  "statuses_count" INTEGER  NOT NULL DEFAULT 0,
   "note" TEXT NOT NULL,
   "url" VARCHAR NOT NULL,
   "avatar" VARCHAR NOT NULL,
@@ -18,4 +17,17 @@ CREATE TABLE "account" (
   "moved_to_account_id" BIGINT REFERENCES "account"("id"),
   -- Service or Person - correlates to "bot" in the REST entity
   "actor_type" VARCHAR NOT NULL
-)
+);
+
+
+
+CREATE TABLE "follow" (
+  "follower_id" BIGINT NOT NULL REFERENCES "account"("id"),
+  "followed_id" BIGINT NOT NULL REFERENCES "account"("id"),
+  "show_reblogs" BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+ALTER TABLE "follow" ADD PRIMARY KEY ("follower_id", "followed_id");
+CREATE INDEX "follower_idx" on "follow" ( "follower_id" );
+CREATE INDEX "followed_idx" on "follow" ( "followed_id" );
+
