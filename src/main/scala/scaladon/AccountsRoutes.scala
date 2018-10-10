@@ -13,6 +13,8 @@ import org.http4s.dsl.Http4sDsl
 import scaladon.entities.{Account, EntityId}
 import scaladon.services.AccountService
 
+import scala.util.Try
+
 
 class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Http4sDsl[F] {
   val apiRoot: Path = Root / "api" / "v1"
@@ -28,10 +30,20 @@ class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Htt
   implicit val URLEncoder: Encoder[URL] = Encoder.instance(url => Json.fromString(url.toString))
   implicit def entityIDEncoder[T]: Encoder[EntityId[T]] = Encoder.instance(id => Json.fromLong(id.id))
 
+  class EntityIdVar[T] {
+    def unapply(s: String): Option[EntityId[T]] =
+      if (!s.trim.isEmpty)
+        Try(EntityId[T](s.toLong)).toOption
+      else
+        None
+  }
+
+  object AccountIdVar extends EntityIdVar[Account]
+
   val routes: HttpRoutes[F] =
     HttpRoutes.of[F] {
-      case GET -> Root / "api" / "v1" / "accounts" / LongVar(id) =>
-        accountService.findAccount(EntityId[Account](id)).flatMap {
+      case GET -> Root / "api" / "v1" / "accounts" / AccountIdVar(id) =>
+        accountService.findAccount(id).flatMap {
           case None          => NotFound()
           case Some(account) => Ok(account.asJson)
         }
