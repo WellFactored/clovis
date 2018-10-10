@@ -4,14 +4,14 @@ import java.net.URL
 
 import cats.effect.Sync
 import cats.implicits._
+import io.circe.generic.auto._
+import io.circe.syntax._
 import io.circe.{Encoder, Json}
 import org.http4s.HttpRoutes
+import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import scaladon.entities.{Account, EntityId}
 import scaladon.services.AccountService
-import org.http4s.circe._
-import io.circe.syntax._
-import io.circe.generic.auto._
 
 
 class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Http4sDsl[F] {
@@ -25,7 +25,8 @@ class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Htt
   object ExcludeReplies extends OptionalQueryParamDecoderMatcher[Boolean]("exclude_replies")
   object AccountIds extends OptionalMultiQueryParamDecoderMatcher[String]("id")
 
-  implicit val URLEncoder:Encoder[URL] = Encoder.instance(url => Json.fromString(url.toString))
+  implicit val URLEncoder: Encoder[URL] = Encoder.instance(url => Json.fromString(url.toString))
+  implicit def entityIDEncoder[T]: Encoder[EntityId[T]] = Encoder.instance(id => Json.fromLong(id.id))
 
   val routes: HttpRoutes[F] =
     HttpRoutes.of[F] {
