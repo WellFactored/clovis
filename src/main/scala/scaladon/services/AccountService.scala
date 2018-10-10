@@ -28,10 +28,10 @@ class AccountSvcImpl[F[_] : Monad, G[_]](accountDatabase: AccountDatabase[G])(im
     type NestedRow[A] = Nested[F, Option, A]
     val F = Monad[F]
 
-    val result: F[Option[(AccountRow, FollowCounts)]] = tx(accountDatabase.accountWithFollows(toRowId(id)))
+    val result: F[Option[(AccountRow, FollowCounts, Int)]] = tx(accountDatabase.accountWithFollows(toRowId(id)))
 
     result.flatMap {
-      case Some((acc, fs)) =>
+      case Some((acc, fs, statusCount)) =>
         val moved: F[Option[Account]] = acc.movedToAccount match {
           case None            => F.pure(None)
           case Some(movedToId) => findAccount(toEntityId(movedToId))
@@ -47,7 +47,7 @@ class AccountSvcImpl[F[_] : Monad, G[_]](accountDatabase: AccountDatabase[G])(im
               acc.createdAt,
               fs.followers,
               fs.following,
-              0,
+              statusCount,
               acc.note,
               acc.url,
               acc.avatar,

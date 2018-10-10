@@ -7,3 +7,8 @@ INSERT INTO account (id, username, domain, display_name, locked, created_at, not
 INSERT INTO follow (follower_id, followed_id) VALUES (28423, 1);
 INSERT INTO follow (follower_id, followed_id) VALUES (28423, 2);
 INSERT INTO follow (follower_id, followed_id) VALUES (1, 28423);
+
+INSERT INTO status
+    (text, created_at, account_id)
+VALUES
+       ('first status!', now(), 28423);

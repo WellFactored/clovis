@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS "status";
 DROP TABLE IF EXISTS "follow";
 DROP TABLE IF EXISTS "account";
 
@@ -31,3 +32,21 @@ ALTER TABLE "follow" ADD PRIMARY KEY ("follower_id", "followed_id");
 CREATE INDEX "follower_idx" on "follow" ( "follower_id" );
 CREATE INDEX "followed_idx" on "follow" ( "followed_id" );
 
+CREATE TABLE "status" (
+  "id" BIGSERIAL NOT NULL PRIMARY KEY,
+  "uri" VARCHAR,
+  "text" VARCHAR NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+  "in_reply_to_id" BIGINT REFERENCES "status"("id"),
+  "reblog_of_id" BIGINT REFERENCES "status"("id"),
+  "sensitive" BOOLEAN NOT NULL DEFAULT FALSE,
+  "visibility" INTEGER NOT NULL DEFAULT 0,
+  "spoiler_text" VARCHAR,
+  "reply" BOOLEAN NOT NULL DEFAULT FALSE,
+  "language" VARCHAR,
+  "account_id" BIGINT REFERENCES "account"("id"),
+  "application_id" BIGINT,
+  "in_reply_to_account_id" BIGINT REFERENCES "account"("id")
+);
+  
+CREATE INDEX "status_account_idx" ON "status" ( "account_id");
