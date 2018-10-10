@@ -6,6 +6,10 @@ import java.time.ZonedDateTime
 import enumeratum.EnumEntry.Lowercase
 import enumeratum._
 
+/**
+  * These are REST entities, so the names of the case class parameters use snake_case instead of
+  * camelCase so that the automatic json codec derivation will map the expected json
+  */
 package object entities {
 
   case class EntityId[T](id: Long)
@@ -39,11 +43,11 @@ package object entities {
   type AttachmentId = EntityId[Attachment]
   case class Attachment(
     id: AttachmentId,
-    _type: String,
+    `type`: String,
     url: URL,
-    remoteURL: Option[URL],
-    previewURL: URL,
-    textURL: Option[URL],
+    remote_url: Option[URL],
+    preview_url: URL,
+    text_url: Option[URL],
     meta: Option[Map[String, Object]],
     description: Option[String]
   )
@@ -55,11 +59,11 @@ package object entities {
     title: String,
     description: String,
     image: Option[URL],
-    _type: String,
-    authorName: Option[OEmbedData],
-    authorURL: Option[OEmbedData],
-    providerName: Option[OEmbedData],
-    providerURL: Option[OEmbedData],
+    `type`: String,
+    author_name: Option[OEmbedData],
+    author_url: Option[OEmbedData],
+    provider_name: Option[OEmbedData],
+    provider_url: Option[OEmbedData],
     html: Option[OEmbedData],
     width: Option[OEmbedData],
     height: Option[OEmbedData],
@@ -67,12 +71,12 @@ package object entities {
 
   case class Context(ancestors: List[Status], descendents: List[Status])
 
-  case class Emoji(shortcode: String, staticUrl: String, url: URL, visibleInPicker: String)
+  case class Emoji(shortcode: String, static_url: String, url: URL, visible_in_picker: String)
 
   case class Error(error: String)
 
   type FilterId = EntityId[Filter]
-  case class Filter(id: FilterId, phrase: String, context: String, expiresAt: Option[ZonedDateTime], irreversible: Boolean, wholeWord: Boolean)
+  case class Filter(id: FilterId, phrase: String, context: String, expires_at: Option[ZonedDateTime], irreversible: Boolean, whole_word: Boolean)
 
   case class Instance(
     uri: URI,
@@ -82,7 +86,7 @@ package object entities {
     version: String,
     //urls:streamingAPI,
     languages: List[String],
-    contactAccount: Account
+    contact_account: Account
   )
 
   // Know as `List` in Mastodon - renamed here for obvious reasons
@@ -103,15 +107,15 @@ package object entities {
     followedBy: Boolean,
     blocking: Boolean,
     muting: Boolean,
-    mutingNotifications: Boolean,
+    muting_notifications: Boolean,
     requested: Boolean,
-    domainBlocking: Boolean,
-    showingReblogs: Boolean,
+    domain_blocking: Boolean,
+    showing_reblogs: Boolean,
     endorsed: Boolean
   )
 
   type ReportId = EntityId[Report]
-  case class Report(id: ReportId, actionTaken: String)
+  case class Report(id: ReportId, action_taken: String)
 
   case class Results(accounts: List[Account], statuses: List[Status], hashtags: List[String])
 
@@ -133,22 +137,22 @@ package object entities {
     uri: URI,
     url: Option[URL],
     account: Account,
-    inReplyToId: Option[StatusId],
-    inReplyToAccountId: Option[AccountId],
+    in_reply_to_id: Option[StatusId],
+    in_reply_to_account_id: Option[AccountId],
     reblog: Option[Status],
     content: String,
-    createdAt: ZonedDateTime,
+    created_at: ZonedDateTime,
     emojis: List[Emoji],
-    repliesCount: Int,
-    reblogsCount: Int,
-    favouritesCount: Int,
+    replies_count: Int,
+    reblogs_count: Int,
+    favourites_count: Int,
     reblogged: Option[Boolean],
     favourited: Option[Boolean],
     muted: Option[Boolean],
     sensitive: Boolean,
-    spoilerText: String,
+    spoiler_text: String,
     visibility: Visibility,
-    mediaAttachments: List[Attachment],
+    media_attachments: List[Attachment],
     mentions: List[Mention],
     tags: List[Tag],
     application: Option[Application],
