@@ -15,9 +15,8 @@ import scaladon.services.AccountService
 
 import scala.util.Try
 
+class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Http4sDsl[F] with HttpService[F] {
 
-class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Http4sDsl[F] {
-  val apiRoot: Path = Root / "api" / "v1"
 
   object MaxId extends OptionalQueryParamDecoderMatcher[Long]("max_id")
   object SinceId extends OptionalQueryParamDecoderMatcher[Long]("since_id")
@@ -40,63 +39,65 @@ class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Htt
 
   object AccountIdVar extends EntityIdVar[Account]
 
-  val routes: HttpRoutes[F] =
+  override val mountPoint: String = "/api/v1/accounts"
+
+  override val routes: HttpRoutes[F] =
     HttpRoutes.of[F] {
-      case GET -> Root / "api" / "v1" / "accounts" / AccountIdVar(id) =>
+      case GET -> Root / AccountIdVar(id) =>
         accountService.findAccount(id).flatMap {
           case None          => NotFound()
           case Some(account) => Ok(account.asJson)
         }
 
-      case GET -> Root / "api" / "v1" / "accounts" / "verify_credentials" =>
+      case GET -> Root / "verify_credentials" =>
         NotImplemented()
 
-      case q@GET -> Root / "api" / "v1" / "accounts" / "relationships" :? AccountIds(ids) =>
+      case q@GET -> Root / "relationships" :? AccountIds(ids) =>
         ids.map(_ => NotImplemented()).getOrElse(BadRequest("missing mandatory 'id' parameter(s)"))
 
 
-      case GET -> Root / "api" / "v1" / "accounts" / "search" =>
+      case GET -> Root / "search" =>
         NotImplemented()
 
-      case PATCH -> Root / "api" / "v1" / "accounts" / "update_credentials" =>
+      case PATCH -> Root / "update_credentials" =>
         NotImplemented()
 
       case GET ->
-        Root / "api" / "v1" / "accounts" / LongVar(id) / "followers"
+        Root / LongVar(id) / "followers"
         :? MaxId(maxId) +& SinceId(sinceId) +& Limit(limt) =>
         NotImplemented()
 
       case GET ->
-        Root / "api" / "v1" / "accounts" / LongVar(id) / "following"
+        Root / LongVar(id) / "following"
         :? MaxId(maxId) +& SinceId(sinceId) +& Limit(limt) =>
         NotImplemented()
 
-      case GET -> Root / "api" / "v1" / "accounts" / LongVar(id) / "statuses"
+      case GET -> Root / LongVar(id) / "statuses"
         :? OnlyMedia(onlyMedia) +& Pinned(pinned) +& ExcludeReplies(excludeReplies) +& MaxId(maxId) +& SinceId(sinceId) +& Limit(limt) =>
         NotImplemented()
 
-      case POST -> Root / "api" / "v1" / "accounts" / LongVar(id) / "follow" =>
+      case POST -> Root / LongVar(id) / "follow" =>
         NotImplemented()
 
-      case POST -> Root / "api" / "v1" / "accounts" / LongVar(id) / "unfollow" =>
+      case POST -> Root / LongVar(id) / "unfollow" =>
         NotImplemented()
 
-      case POST -> Root / "api" / "v1" / "accounts" / LongVar(id) / "block" =>
+      case POST -> Root / LongVar(id) / "block" =>
         NotImplemented()
 
-      case POST -> Root / "api" / "v1" / "accounts" / LongVar(id) / "unblock" =>
+      case POST -> Root / LongVar(id) / "unblock" =>
         NotImplemented()
 
-      case POST -> Root / "api" / "v1" / "accounts" / LongVar(id) / "mute" =>
+      case POST -> Root / LongVar(id) / "mute" =>
         NotImplemented()
 
-      case POST -> Root / "api" / "v1" / "accounts" / LongVar(id) / "unmute" =>
+      case POST -> Root / LongVar(id) / "unmute" =>
         NotImplemented()
 
-      case POST -> Root / "api" / "v1" / "accounts" / LongVar(id) / "pin" =>
+      case POST -> Root / LongVar(id) / "pin" =>
         NotImplemented()
 
-      case POST -> Root / "api" / "v1" / "accounts" / LongVar(id) / "unpin" =>
+      case POST -> Root / LongVar(id) / "unpin" =>
         NotImplemented()
 
     }

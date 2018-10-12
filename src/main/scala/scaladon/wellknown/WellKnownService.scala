@@ -40,9 +40,23 @@ class WellKnownSvcImpl[F[_] : Monad, G[_]](
 
   private def toWebfingerResult(account: AccountRow): WebfingerResult = {
     val links = List(
-      Link("http://webfinger.net/rel/profile-page", Some("text/html"), Some(new URI(s"https://$localDomain/@${account.username}")))
+      Link("http://webfinger.net/rel/profile-page", Some("text/html"), Some(shortAccountURL(account))),
+      Link("http://schemas.google.com/g/2010#updates-from", Some("application/atom+xml"), Some(accountURL(account, Some("atom")))),
+      Link("self", Some("application/activity+json"), Some(accountURL(account, None))),
     )
 
     WebfingerResult(new URI(s"acct:${account.username}@$localDomain"), None, Some(links), None)
   }
+  private def shortAccountURL(account: AccountRow): URI =
+    new URI(s"https://$localDomain/@${account.username}")
+
+  private def accountURL(account: AccountRow, format: Option[String]): URI = {
+    val base = s"https://$localDomain/users/${account.username}"
+
+    format match {
+      case None      => new URI(base)
+      case Some(fmt) => new URI(s"$base.$fmt")
+    }
+  }
+
 }

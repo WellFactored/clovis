@@ -12,7 +12,7 @@ import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import scaladon.wellknown.WellKnownService
 
-class WellKnownRoutes[F[_] : Sync](wellknownService: WellKnownService[F]) extends Http4sDsl[F] {
+class WellKnownRoutes[F[_] : Sync](wellknownService: WellKnownService[F]) extends Http4sDsl[F] with HttpService[F] {
   object Resource extends QueryParamDecoderMatcher[String]("resource")
 
   implicit val uriEncoder   : Encoder[URI]    = Encoder.instance(uri => Json.fromString(uri.toString))
@@ -31,9 +31,11 @@ class WellKnownRoutes[F[_] : Sync](wellknownService: WellKnownService[F]) extend
         }
       }
 
-  val routes: HttpRoutes[F] =
+  override val mountPoint: String = "/.well-known"
+
+  override val routes: HttpRoutes[F] =
     HttpRoutes.of[F] {
-      case GET -> Root / ".well-known" / "webfinger" :? Resource(resource) =>
+      case GET -> Root / "webfinger" :? Resource(resource) =>
         wellknownService.webfinger(resource).flatMap {
           case None      => NotFound()
           case Some(wfr) => Ok(dropNullValues(wfr.asJson))
