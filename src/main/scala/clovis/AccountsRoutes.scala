@@ -43,7 +43,7 @@ class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Htt
   object ExcludeReplies extends OptionalQueryParamDecoderMatcher[Boolean]("exclude_replies")
   object AccountIds extends OptionalMultiQueryParamDecoderMatcher[String]("id")
 
-  implicit val URLEncoder: Encoder[URL] = Encoder.instance(url => Json.fromString(url.toString))
+  implicit val urlEncoder: Encoder[URL] = Encoder.instance(url => Json.fromString(url.toString))
   implicit def entityIDEncoder[T]: Encoder[EntityId[T]] = Encoder.instance(id => Json.fromLong(id.id))
 
   class EntityIdVar[T] {
