@@ -1,3 +1,5 @@
+import de.heikoseeberger.sbtheader.License
+
 val Http4sVersion = "0.19.0"
 val Specs2Version = "4.2.0"
 val LogbackVersion = "1.2.3"
@@ -5,6 +7,10 @@ val LogbackVersion = "1.2.3"
 val enumeratumVersion = "1.5.13"
 lazy val doobieVersion = "0.6.0-RC1"
 val circeVersion = "0.10.0"
+
+organizationName := "com.wellfactored"
+startYear := Some(2018)
+licenses += ("AGPL-3.0", new URL("https://www.gnu.org/licenses/agpl.html"))
 
 lazy val root = (project in file("."))
   .settings(
