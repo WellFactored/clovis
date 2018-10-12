@@ -8,7 +8,7 @@ val enumeratumVersion = "1.5.13"
 lazy val doobieVersion = "0.6.0-RC1"
 val circeVersion = "0.10.0"
 
-organizationName := "com.wellfactored"
+organizationName := "Well-Factored Software Ltd."
 startYear := Some(2018)
 licenses += ("AGPL-3.0", new URL("https://www.gnu.org/licenses/agpl.html"))
 
