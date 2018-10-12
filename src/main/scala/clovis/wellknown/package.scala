@@ -15,15 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package scaladon
+package clovis
 
-import org.http4s.HttpRoutes
+import java.net.URI
 
-/**
-  * `HttpService` combines a set of routes with a mount point. These form the parameters to the
-  * `BlazeBuilder.mountService`
-  */
-trait HttpService[F[_]] {
-  def routes: HttpRoutes[F]
-  def mountPoint: String
+package object wellknown {
+
+  case class Link(rel: String, `type`: Option[String], href: Option[URI], titles: Option[Map[String, String]] = None, properties: Option[Map[URI, Option[String]]] = None, template: Option[String] = None)
+  case class WebfingerResult(subject: URI, aliases: Option[List[URI]], links: Option[List[Link]], properties: Option[Map[URI, Option[String]]])
 }

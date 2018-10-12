@@ -15,14 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package scaladon.wellknown
+package clovis.wellknown
 
 import java.net.URI
 
 import cats.implicits._
 import cats.{Applicative, Monad, ~>}
-import scaladon.database.AccountDatabase
-import scaladon.database.rows.AccountRow
+import clovis.database.AccountDatabase
+import clovis.database.rows.AccountRow
 
 trait WellKnownService[F[_]] {
   def webfinger(acct: String): F[Option[WebfingerResult]]

@@ -15,6 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package scaladon.database.rows
+package clovis
 
-case class RowId[T](id: Long)
+import org.http4s.HttpRoutes
+
+/**
+  * `HttpService` combines a set of routes with a mount point. These form the parameters to the
+  * `BlazeBuilder.mountService`
+  */
+trait HttpService[F[_]] {
+  def routes: HttpRoutes[F]
+  def mountPoint: String
+}

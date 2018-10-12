@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package scaladon
+package clovis
 
 import java.net.URL
 
@@ -27,8 +27,8 @@ import io.circe.{Encoder, Json}
 import org.http4s.HttpRoutes
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import scaladon.entities.{Account, EntityId}
-import scaladon.services.AccountService
+import clovis.entities.{Account, EntityId}
+import clovis.services.AccountService
 
 import scala.util.Try
 

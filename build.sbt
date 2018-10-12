@@ -15,7 +15,7 @@ licenses += ("AGPL-3.0", new URL("https://www.gnu.org/licenses/agpl.html"))
 lazy val root = (project in file("."))
   .settings(
     organization := "com.wellfactored",
-    name := "scaladon",
+    name := "clovis",
     version := "0.0.1-SNAPSHOT",
     scalaVersion := "2.12.7",
     scalacOptions ++= Seq("-Ypartial-unification"),

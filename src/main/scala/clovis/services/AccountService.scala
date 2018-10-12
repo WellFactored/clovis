@@ -15,14 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package scaladon.services
+package clovis.services
 
 import cats.data.Nested
 import cats.implicits._
 import cats.{Monad, ~>}
-import scaladon.database.{AccountDatabase, FollowCounts}
-import scaladon.database.rows.{AccountRow, ActorType, RowId}
-import scaladon.entities.{Account, AccountId, Emoji, EntityId}
+import clovis.database.{AccountDatabase, FollowCounts}
+import clovis.database.rows.{AccountRow, ActorType, RowId}
+import clovis.entities.{Account, AccountId, Emoji, EntityId}
 
 trait AccountService[F[_]] {
   def findAccount(id: AccountId): F[Option[Account]]

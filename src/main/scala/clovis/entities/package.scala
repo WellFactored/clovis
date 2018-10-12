@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package scaladon
+package clovis
 
 import java.net.{URI, URL}
 import java.time.ZonedDateTime

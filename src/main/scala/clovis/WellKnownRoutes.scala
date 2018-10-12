@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package scaladon
+package clovis
 
 import java.net.URI
 
@@ -27,7 +27,7 @@ import io.circe.{Encoder, Json, KeyEncoder}
 import org.http4s.HttpRoutes
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import scaladon.wellknown.WellKnownService
+import clovis.wellknown.WellKnownService
 
 class WellKnownRoutes[F[_] : Sync](wellknownService: WellKnownService[F]) extends Http4sDsl[F] with HttpService[F] {
   object Resource extends QueryParamDecoderMatcher[String]("resource")

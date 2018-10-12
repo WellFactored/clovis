@@ -15,16 +15,14 @@ CREATE TABLE "account" (
   "avatar_static" VARCHAR NOT NULL,
   "header" VARCHAR NOT NULL,
   "header_static" VARCHAR NOT NULL,
-  "moved_to_account_id" BIGINT REFERENCES "account"("id"),
+  "moved_to_account_id" BIGINT REFERENCES "account"("id") ON DELETE CASCADE,
   -- Service or Person - correlates to "bot" in the REST entity
   "actor_type" VARCHAR NOT NULL
 );
 
-
-
 CREATE TABLE "follow" (
-  "follower_id" BIGINT NOT NULL REFERENCES "account"("id"),
-  "followed_id" BIGINT NOT NULL REFERENCES "account"("id"),
+  "follower_id" BIGINT NOT NULL REFERENCES "account"("id") ON DELETE CASCADE,
+  "followed_id" BIGINT NOT NULL REFERENCES "account"("id") ON DELETE CASCADE,
   "show_reblogs" BOOLEAN NOT NULL DEFAULT FALSE
 );
 
@@ -37,16 +35,16 @@ CREATE TABLE "status" (
   "uri" VARCHAR,
   "text" VARCHAR NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
-  "in_reply_to_id" BIGINT REFERENCES "status"("id"),
-  "reblog_of_id" BIGINT REFERENCES "status"("id"),
+  "in_reply_to_id" BIGINT REFERENCES "status"("id") ON DELETE CASCADE,
+  "reblog_of_id" BIGINT REFERENCES "status"("id") ON DELETE CASCADE,
   "sensitive" BOOLEAN NOT NULL DEFAULT FALSE,
   "visibility" INTEGER NOT NULL DEFAULT 0,
   "spoiler_text" VARCHAR,
   "reply" BOOLEAN NOT NULL DEFAULT FALSE,
   "language" VARCHAR,
-  "account_id" BIGINT REFERENCES "account"("id"),
+  "account_id" BIGINT REFERENCES "account"("id") ON DELETE CASCADE,
   "application_id" BIGINT,
-  "in_reply_to_account_id" BIGINT REFERENCES "account"("id")
+  "in_reply_to_account_id" BIGINT REFERENCES "account"("id") ON DELETE CASCADE
 );
   
 CREATE INDEX "status_account_idx" ON "status" ( "account_id");

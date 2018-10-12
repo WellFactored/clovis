@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package scaladon
+package clovis
 
 import cats.effect._
 import cats.implicits._
@@ -27,15 +27,15 @@ import doobie.util.transactor.Transactor.Aux
 import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
-import scaladon.database.DoobieAccountDB
-import scaladon.services.{AccountService, AccountSvcImpl}
-import scaladon.wellknown.{WellKnownService, WellKnownSvcImpl}
+import clovis.database.DoobieAccountDB
+import clovis.services.{AccountService, AccountSvcImpl}
+import clovis.wellknown.{WellKnownService, WellKnownSvcImpl}
 
-object ScaladonServer extends IOApp {
+object ClovisServer extends IOApp {
   val xa: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
     "org.postgresql.Driver", // driver classname
-    "jdbc:postgresql:scaladon", // connect URL (driver-specific)
-    "scaladon", // user
+    "jdbc:postgresql:clovis", // connect URL (driver-specific)
+    "clovis", // user
     "" // password
   )
 
@@ -51,10 +51,10 @@ object ScaladonServer extends IOApp {
   val webfingerService: WellKnownService[IO] = new WellKnownSvcImpl[IO, ConnectionIO](localDomain, List(localDomain), accountDB)
 
   def run(args: List[String]): IO[ExitCode] =
-    ScaladonStream.stream[IO](accountService, webfingerService).compile.drain.as(ExitCode.Success)
+    ClovisStream.stream[IO](accountService, webfingerService).compile.drain.as(ExitCode.Success)
 }
 
-object ScaladonStream {
+object ClovisStream {
   def stream[F[_] : ConcurrentEffect](accountService: AccountService[F], webfingerService: WellKnownService[F]): fs2.Stream[F, ExitCode] = {
     val services: Seq[HttpService[F]] = List(
       new AccountsRoutes[F](accountService),

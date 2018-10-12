@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package scaladon.database
+package clovis.database
 
 import cats.~>
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
-import scaladon.database.rows.{AccountId, AccountRow}
+import clovis.database.rows.{AccountId, AccountRow}
 
 case class FollowCounts(followers: Int, following: Int)
 
