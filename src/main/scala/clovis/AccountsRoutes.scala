@@ -32,7 +32,7 @@ import clovis.services.AccountService
 
 import scala.util.Try
 
-class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Http4sDsl[F] with HttpService[F] {
+class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Http4sDsl[F] with MountableService[F] {
 
 
   object MaxId extends OptionalQueryParamDecoderMatcher[Long]("max_id")
@@ -63,7 +63,7 @@ class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Htt
       case GET -> Root / AccountIdVar(id) =>
         accountService.findAccount(id).flatMap {
           case None          => NotFound()
-          case Some(account) => Ok(account.asJson)
+          case Some(account) => Ok(account.asJson.dropNulls)
         }
 
       case GET -> Root / "verify_credentials" =>

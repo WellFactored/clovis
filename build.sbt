@@ -1,4 +1,4 @@
-import de.heikoseeberger.sbtheader.License
+enablePlugins(JavaAppPackaging)
 
 val Http4sVersion = "0.19.0"
 val Specs2Version = "4.2.0"
@@ -29,15 +29,20 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-generic" % circeVersion,
       //For string interpolation to JSON model
       "io.circe" %% "circe-literal" % circeVersion,
+      "io.circe" %% "circe-parser" % circeVersion,
 
+
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
       "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
 
       "com.beachape" %% "enumeratum" % enumeratumVersion,
+      "com.beachape" %% "enumeratum-circe" % enumeratumVersion,
 
       "org.tpolecat" %% "doobie-core" % doobieVersion,
       "org.tpolecat" %% "doobie-postgres" % doobieVersion,
-      "org.tpolecat" %% "doobie-specs2" % doobieVersion
+      "org.tpolecat" %% "doobie-scalatest" % doobieVersion
     ),
     addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4")

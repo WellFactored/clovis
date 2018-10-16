@@ -138,7 +138,7 @@ package object entities {
 
   sealed trait Visibility extends EnumEntry with Lowercase
 
-  object Visibility extends Enum[Visibility] {
+  object Visibility extends Enum[Visibility] with CirceEnum[Visibility] {
     //noinspection TypeAnnotation
     val values = findValues
 

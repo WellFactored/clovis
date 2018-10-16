@@ -56,7 +56,7 @@ object ClovisServer extends IOApp {
 
 object ClovisStream {
   def stream[F[_] : ConcurrentEffect](accountService: AccountService[F], webfingerService: WellKnownService[F]): fs2.Stream[F, ExitCode] = {
-    val services: Seq[HttpService[F]] = List(
+    val services: Seq[MountableService[F]] = List(
       new AccountsRoutes[F](accountService),
       new WellKnownRoutes[F](webfingerService)
     )
