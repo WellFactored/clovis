@@ -31,6 +31,7 @@ class WellKnownRoutesTest extends FreeSpecLike with Matchers with OptionValues w
   val knownAccount   = "known"
   val unknownAccount = "unknown"
   val knownAcctURI   = new URI("/known/uri")
+  private val webfingerPath = "/webfinger"
 
   private val service = new WellKnownService[IO] {
     override def webfinger(acct: String): IO[Option[WebfingerResult]] = {
@@ -39,11 +40,12 @@ class WellKnownRoutesTest extends FreeSpecLike with Matchers with OptionValues w
     }
   }
 
-  private val routes = new WellKnownRoutes[IO](service).routes.orNotFound
+  private val routes: HttpRoutes[IO] = new WellKnownRoutes[IO](service).routes
+
 
   "calling webfinger" - {
     "on a known account should return an OK response with the correct data in the body" in {
-      val request = Request[IO](Method.GET, Uri(path = "/webfinger", query = Query("resource" -> Some(knownAccount))))
+      val request: Request[IO] = Request[IO](Method.GET, buildUri(Some(knownAccount)))
 
       val response: Response[IO] = routeRequest(request)
       response.status.code shouldBe 200
@@ -53,11 +55,27 @@ class WellKnownRoutesTest extends FreeSpecLike with Matchers with OptionValues w
     }
 
     "on an unknown account should respond with 404" in {
-      val request = Request[IO](Method.GET, Uri(path = "/webfinger", query = Query("resource" -> Some(unknownAccount))))
+      val request = Request[IO](Method.GET, buildUri(Some(unknownAccount)))
       routeRequest(request).status.code shouldBe 404
+    }
+
+    "with no account value should respond with 404" in {
+      val request = Request[IO](Method.GET, buildUri(None))
+      routes.orNotFound(request).unsafeRunSync().status.code shouldBe 404
+    }
+
+    "with no account parameter should respond with 404" in {
+      val request = Request[IO](Method.GET, Uri(path = webfingerPath))
+      routes.orNotFound(request).unsafeRunSync().status.code shouldBe 404
     }
   }
 
+  private def buildUri(account: Option[String]): Uri =
+    Uri(path = webfingerPath, query = Query("resource" -> account))
+
   private def routeRequest(request: Request[IO]): Response[IO] =
-    routes(request).unsafeRunSync()
+    routes(request).value.unsafeRunSync() match {
+      case None           => fail(s"No route was found to handle ${request.uri.toString()}")
+      case Some(response) => response
+    }
 }
