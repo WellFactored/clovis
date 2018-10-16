@@ -29,7 +29,7 @@ import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import clovis.database.DoobieAccountDB
 import clovis.services.{AccountService, AccountSvcImpl}
-import clovis.wellknown.{WellKnownService, WellKnownSvcImpl}
+import clovis.wellknown.{WellKnownRoutes, WellKnownService, WellKnownSvcImpl}
 
 object ClovisServer extends IOApp {
   val xa: Aux[IO, Unit] = Transactor.fromDriverManager[IO](

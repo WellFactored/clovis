@@ -16,10 +16,10 @@
  */
 
 package clovis
+package wellknown
 
 import cats.effect.Sync
 import cats.implicits._
-import clovis.wellknown.WellKnownService
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.HttpRoutes

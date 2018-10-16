@@ -16,11 +16,11 @@
  */
 
 package clovis
+package wellknown
 
 import java.net.URI
 
 import cats.effect._
-import clovis.wellknown.{WebfingerResult, WellKnownService}
 import io.circe.generic.auto._
 import org.http4s._
 import org.http4s.circe.CirceEntityDecoder._
@@ -41,7 +41,6 @@ class WellKnownRoutesTest extends FreeSpecLike with Matchers with OptionValues w
   }
 
   private val routes: HttpRoutes[IO] = new WellKnownRoutes[IO](service).routes
-
 
   "calling webfinger" - {
     "on a known account should return an OK response with the correct data in the body" in {
