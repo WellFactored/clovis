@@ -26,6 +26,7 @@ import clovis.database.rows.AccountRow
 
 trait WellKnownService[F[_]] {
   def webfinger(acct: String): F[Option[WebfingerResult]]
+  def hostMeta: F[HostMeta]
 }
 
 class WellKnownSvcImpl[F[_] : Monad, G[_]](
@@ -37,6 +38,10 @@ class WellKnownSvcImpl[F[_] : Monad, G[_]](
 )
   extends WellKnownService[F] {
   private val F = Applicative[F]
+
+
+  override def hostMeta: F[HostMeta] =
+    F.pure(HostMeta(Seq(Link("lrdd", Some("application/xrd+xml"), None, template = Some(s"https://$localDomain/.well-known/webfinger?resource={uri}")))))
 
   override def webfinger(acct: String): F[Option[WebfingerResult]] = {
     val User = "acct:(.*)@(.*)".r

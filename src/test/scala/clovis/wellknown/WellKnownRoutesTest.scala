@@ -38,6 +38,7 @@ class WellKnownRoutesTest extends FreeSpecLike with Matchers with OptionValues w
       if (acct == knownAccount) IO.pure(Some(WebfingerResult(knownAcctURI, None, None, None)))
       else IO.pure(None)
     }
+    override def hostMeta: IO[HostMeta] = ???
   }
 
   private val routes: HttpRoutes[IO] = new WellKnownRoutes[IO](service).routes
