@@ -35,8 +35,8 @@ trait MetaHelpers {
     Meta[String].imap(s => new URL(s))(_.toString)
 
   implicit val zonedDateTimeMeta: Meta[ZonedDateTime] =
-    Meta[Timestamp].imap(
-      ts => ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts.getTime), ZoneId.systemDefault))(
+    Meta[Timestamp].imap(ts =>
+      ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts.getTime), ZoneId.systemDefault))(
       zdt => new Timestamp(Instant.from(zdt).toEpochMilli)
     )
 

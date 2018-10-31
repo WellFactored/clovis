@@ -15,21 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package clovis
+package clovis.database.rows
 
-/**
-  * These are REST entities, so the names of the case class parameters use snake_case instead of
-  * camelCase so that the automatic json codec derivation will map the expected json
-  */
-package object entities {
-  type AccountId          = EntityId[Account]
-  type AttachmentId       = EntityId[Attachment]
-  type FilterId           = EntityId[Filter]
-  type MembershipListId   = EntityId[MembershipList]
-  type NotificationId     = EntityId[Notification]
-  type PushSubscriptionId = EntityId[PushSubscription]
-  type ReportId           = EntityId[Report]
-  type StatusId           = EntityId[Status]
+import java.net.URL
+import java.time.ZonedDateTime
 
-  type OEmbedData = String
-}
+case class AccountRow(
+  username: String,
+  domain: Option[String],
+  displayName: String,
+  locked: Boolean,
+  createdAt: ZonedDateTime,
+  note: String,
+  url: URL,
+  avatar: URL,
+  avatarStatic: URL,
+  header: URL,
+  headerStatic: URL,
+  movedToAccount: Option[AccountId],
+  actorType: ActorType,
+  id: AccountId
+)

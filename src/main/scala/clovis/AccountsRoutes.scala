@@ -32,19 +32,21 @@ import clovis.services.AccountService
 
 import scala.util.Try
 
-class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Http4sDsl[F] with MountableService[F] {
+class AccountsRoutes[F[_]: Sync](accountService: AccountService[F])
+    extends Http4sDsl[F]
+    with MountableService[F] {
 
-
-  object MaxId extends OptionalQueryParamDecoderMatcher[Long]("max_id")
-  object SinceId extends OptionalQueryParamDecoderMatcher[Long]("since_id")
-  object Limit extends OptionalQueryParamDecoderMatcher[Int]("limit")
-  object OnlyMedia extends OptionalQueryParamDecoderMatcher[Boolean]("only_media")
-  object Pinned extends OptionalQueryParamDecoderMatcher[Boolean]("pinned")
+  object MaxId          extends OptionalQueryParamDecoderMatcher[Long]("max_id")
+  object SinceId        extends OptionalQueryParamDecoderMatcher[Long]("since_id")
+  object Limit          extends OptionalQueryParamDecoderMatcher[Int]("limit")
+  object OnlyMedia      extends OptionalQueryParamDecoderMatcher[Boolean]("only_media")
+  object Pinned         extends OptionalQueryParamDecoderMatcher[Boolean]("pinned")
   object ExcludeReplies extends OptionalQueryParamDecoderMatcher[Boolean]("exclude_replies")
-  object AccountIds extends OptionalMultiQueryParamDecoderMatcher[String]("id")
+  object AccountIds     extends OptionalMultiQueryParamDecoderMatcher[String]("id")
 
   implicit val urlEncoder: Encoder[URL] = Encoder.instance(url => Json.fromString(url.toString))
-  implicit def entityIDEncoder[T]: Encoder[EntityId[T]] = Encoder.instance(id => Json.fromLong(id.id))
+  implicit def entityIDEncoder[T]: Encoder[EntityId[T]] =
+    Encoder.instance(id => Json.fromLong(id.id))
 
   class EntityIdVar[T] {
     def unapply(s: String): Option[EntityId[T]] =
@@ -69,9 +71,8 @@ class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Htt
       case GET -> Root / "verify_credentials" =>
         NotImplemented()
 
-      case q@GET -> Root / "relationships" :? AccountIds(ids) =>
+      case q @ GET -> Root / "relationships" :? AccountIds(ids) =>
         ids.map(_ => NotImplemented()).getOrElse(BadRequest("missing mandatory 'id' parameter(s)"))
-
 
       case GET -> Root / "search" =>
         NotImplemented()
@@ -80,17 +81,18 @@ class AccountsRoutes[F[_] : Sync](accountService: AccountService[F]) extends Htt
         NotImplemented()
 
       case GET ->
-        Root / LongVar(id) / "followers"
-        :? MaxId(maxId) +& SinceId(sinceId) +& Limit(limt) =>
+            Root / LongVar(id) / "followers"
+            :? MaxId(maxId) +& SinceId(sinceId) +& Limit(limt) =>
         NotImplemented()
 
       case GET ->
-        Root / LongVar(id) / "following"
-        :? MaxId(maxId) +& SinceId(sinceId) +& Limit(limt) =>
+            Root / LongVar(id) / "following"
+            :? MaxId(maxId) +& SinceId(sinceId) +& Limit(limt) =>
         NotImplemented()
 
       case GET -> Root / LongVar(id) / "statuses"
-        :? OnlyMedia(onlyMedia) +& Pinned(pinned) +& ExcludeReplies(excludeReplies) +& MaxId(maxId) +& SinceId(sinceId) +& Limit(limt) =>
+            :? OnlyMedia(onlyMedia) +& Pinned(pinned) +& ExcludeReplies(excludeReplies) +& MaxId(
+              maxId) +& SinceId(sinceId) +& Limit(limt) =>
         NotImplemented()
 
       case POST -> Root / LongVar(id) / "follow" =>

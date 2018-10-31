@@ -31,7 +31,8 @@ trait AccountDatabase[F[_]] {
 }
 
 class DoobieAccountDB extends AccountDatabase[ConnectionIO] with MetaHelpers {
-  private val selectAccount = fr"""select username, domain, display_name, locked, created_at, note, url, avatar, avatar_static, header, header_static, moved_to_account_id, actor_type, id from account"""
+  private val selectAccount =
+    fr"""select username, domain, display_name, locked, created_at, note, url, avatar, avatar_static, header, header_static, moved_to_account_id, actor_type, id from account"""
   override def accountById(id: AccountId): ConnectionIO[Option[AccountRow]] =
     (selectAccount ++ fr"""where id = $id""")
       .query[AccountRow]
@@ -42,7 +43,6 @@ class DoobieAccountDB extends AccountDatabase[ConnectionIO] with MetaHelpers {
       .query[FollowCounts]
       .unique
 
-
   private def statusCount(id: AccountId): ConnectionIO[Int] =
     sql"select count(id) from status where account_id = $id"
       .query[Int]
@@ -51,8 +51,8 @@ class DoobieAccountDB extends AccountDatabase[ConnectionIO] with MetaHelpers {
   def accountWithFollows(id: AccountId): ConnectionIO[Option[(AccountRow, FollowCounts, Int)]] = {
     for {
       acc <- accountById(id)
-      f <- followCounts(id)
-      s <- statusCount(id)
+      f   <- followCounts(id)
+      s   <- statusCount(id)
     } yield (acc, f, s)
   }.map {
     case (Some(a), f, s) => Some((a, f, s))
@@ -65,8 +65,10 @@ class DoobieAccountDB extends AccountDatabase[ConnectionIO] with MetaHelpers {
       .option
 }
 
-class EmbeddedAccountDB[F[_]](doobie: DoobieAccountDB, tx: ConnectionIO ~> F) extends AccountDatabase[F] {
-  override def accountById(id: AccountId): F[Option[AccountRow]] = tx(doobie.accountById(id))
+class EmbeddedAccountDB[F[_]](doobie: DoobieAccountDB, tx: ConnectionIO ~> F)
+    extends AccountDatabase[F] {
+  override def accountById(id: AccountId): F[Option[AccountRow]]  = tx(doobie.accountById(id))
   override def accountByName(name: String): F[Option[AccountRow]] = tx(doobie.accountByName(name))
-  override def accountWithFollows(id: AccountId): F[Option[(AccountRow, FollowCounts, Int)]] = tx(doobie.accountWithFollows(id))
+  override def accountWithFollows(id: AccountId): F[Option[(AccountRow, FollowCounts, Int)]] =
+    tx(doobie.accountWithFollows(id))
 }

@@ -28,7 +28,6 @@ import scala.util.Try
 package object clovis {
   implicit val uriEncoder: Encoder[URI] = Encoder.instance(uri => Json.fromString(uri.toString))
 
-
   implicit val uriDecoder: Decoder[URI] = Decoder.instance { uri =>
     uri.value.asString match {
       case Some(s) => Try(new URI(s)).toEither.leftMap(t => DecodingFailure(t.getMessage, List()))

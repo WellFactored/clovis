@@ -20,6 +20,9 @@ package clovis
 import cats.effect._
 import cats.implicits._
 import cats.~>
+import clovis.database.DoobieAccountDB
+import clovis.services.{AccountService, AccountSvcImpl}
+import clovis.wellknown.{WellKnownRoutes, WellKnownService, WellKnownSvcImpl}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
@@ -27,9 +30,6 @@ import doobie.util.transactor.Transactor.Aux
 import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
-import clovis.database.DoobieAccountDB
-import clovis.services.{AccountService, AccountSvcImpl}
-import clovis.wellknown.{WellKnownRoutes, WellKnownService, WellKnownSvcImpl}
 
 object ClovisServer extends IOApp {
   val xa: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
@@ -46,16 +46,23 @@ object ClovisServer extends IOApp {
 
   val localDomain = "scala.haus"
 
-  val accountDB       : DoobieAccountDB      = new DoobieAccountDB
-  val accountService  : AccountService[IO]   = new AccountSvcImpl[IO, ConnectionIO](accountDB)
-  val webfingerService: WellKnownService[IO] = new WellKnownSvcImpl[IO, ConnectionIO](localDomain, List(localDomain), accountDB)
+  val accountDB: DoobieAccountDB         = new DoobieAccountDB
+  val accountService: AccountService[IO] = new AccountSvcImpl[IO, ConnectionIO](accountDB)
+  val webfingerService: WellKnownService[IO] =
+    new WellKnownSvcImpl[IO, ConnectionIO](localDomain, List(localDomain), accountDB)
 
-  def run(args: List[String]): IO[ExitCode] =
-    ClovisStream.stream[IO](accountService, webfingerService).compile.drain.as(ExitCode.Success)
+  def run(args: List[String]): IO[ExitCode] = {
+    // annotate to keep wartremover happy
+    val compile =
+      ClovisStream.stream[IO](accountService, webfingerService).compile[IO, IO, ExitCode]
+    compile.drain.as(ExitCode.Success)
+  }
 }
 
 object ClovisStream {
-  def stream[F[_] : ConcurrentEffect](accountService: AccountService[F], webfingerService: WellKnownService[F]): fs2.Stream[F, ExitCode] = {
+  def stream[F[_]: ConcurrentEffect](
+    accountService: AccountService[F],
+    webfingerService: WellKnownService[F]): fs2.Stream[F, ExitCode] = {
     val services: Seq[MountableService[F]] = List(
       new AccountsRoutes[F](accountService),
       new WellKnownRoutes[F](webfingerService)

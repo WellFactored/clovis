@@ -17,23 +17,23 @@
 
 package clovis.services
 
-import cats.data.Nested
 import cats.implicits._
 import cats.{Monad, ~>}
-import clovis.database.{AccountDatabase, FollowCounts}
 import clovis.database.rows.{AccountRow, ActorType, RowId}
+import clovis.database.{AccountDatabase, FollowCounts}
 import clovis.entities.{Account, AccountId, Emoji, EntityId}
 
 trait AccountService[F[_]] {
   def findAccount(id: AccountId): F[Option[Account]]
 }
 
-class AccountSvcImpl[F[_] : Monad, G[_]](accountDatabase: AccountDatabase[G])(implicit tx: G ~> F) extends AccountService[F] {
+class AccountSvcImpl[F[_]: Monad, G[_]](accountDatabase: AccountDatabase[G])(implicit tx: G ~> F)
+    extends AccountService[F] {
 
   def acct(row: AccountRow): String = {
     row.domain match {
       case None         => row.username
-      case Some(domain) => s"${row.username}@${row.domain}"
+      case Some(domain) => s"${row.username}@$domain"
     }
   }
 
@@ -41,11 +41,10 @@ class AccountSvcImpl[F[_] : Monad, G[_]](accountDatabase: AccountDatabase[G])(im
   def toEntityId[T, T2](rowId: RowId[T]): EntityId[T2] = EntityId[T2](rowId.id)
 
   override def findAccount(id: AccountId): F[Option[Account]] = {
-    // keep intellij happy
-    type NestedRow[A] = Nested[F, Option, A]
     val F = Monad[F]
 
-    val result: F[Option[(AccountRow, FollowCounts, Int)]] = tx(accountDatabase.accountWithFollows(toRowId(id)))
+    val result: F[Option[(AccountRow, FollowCounts, Int)]] = tx(
+      accountDatabase.accountWithFollows(toRowId(id)))
 
     result.flatMap {
       case Some((acc, fs, statusCount)) =>
@@ -58,7 +57,8 @@ class AccountSvcImpl[F[_] : Monad, G[_]](accountDatabase: AccountDatabase[G])(im
           Some(
             Account(
               EntityId[Account](acc.id.id),
-              acc.username, acct(acc),
+              acc.username,
+              acct(acc),
               acc.displayName,
               acc.locked,
               acc.createdAt,

@@ -27,7 +27,7 @@ import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.dsl.io._
 import org.scalatest.{EitherValues, FreeSpecLike, Matchers, OptionValues}
 
-class WellKnownRoutesTest extends FreeSpecLike with Matchers with OptionValues with EitherValues {
+class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues with EitherValues {
   val knownAccount   = "known"
   val unknownAccount = "unknown"
   val knownAcctURI   = new URI("/known/uri")
@@ -38,20 +38,24 @@ class WellKnownRoutesTest extends FreeSpecLike with Matchers with OptionValues w
       if (acct == knownAccount) IO.pure(Some(WebfingerResult(knownAcctURI, None, None, None)))
       else IO.pure(None)
     }
-    override def hostMeta: IO[HostMeta] = ???
+    override def hostMeta: IO[HostMeta] = IO.pure(HostMeta(Seq()))
   }
 
   private val routes: HttpRoutes[IO] = new WellKnownRoutes[IO](service).routes
 
   "calling webfinger" - {
-    "on a known account should return an OK response with the correct data in the body" in {
+    "on a known account" - {
       val request: Request[IO] = Request[IO](Method.GET, buildUri(Some(knownAccount)))
-
       val response: Response[IO] = routeRequest(request)
-      response.status.code shouldBe 200
 
-      val result: WebfingerResult = response.as[WebfingerResult].unsafeRunSync()
-      result.subject shouldBe knownAcctURI
+      "should respond with an OK" in {
+        response.status.code shouldBe 200
+      }
+
+      "and have the correct data in the body" in {
+        val result: WebfingerResult = response.as[WebfingerResult].unsafeRunSync()
+        result.subject shouldBe knownAcctURI
+      }
     }
 
     "on an unknown account should respond with 404" in {

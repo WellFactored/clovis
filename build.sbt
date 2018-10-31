@@ -1,3 +1,5 @@
+import sbt.addCompilerPlugin
+
 enablePlugins(JavaAppPackaging)
 
 val Http4sVersion = "0.19.0"
@@ -33,6 +35,8 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-literal" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion,
 
+      "io.estatico" %% "newtype" % "0.4.2",
+
 
       "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
       "org.scalatest" %% "scalatest" % "3.0.5" % "test",
@@ -47,8 +51,13 @@ lazy val root = (project in file("."))
       "org.tpolecat" %% "doobie-scalatest" % doobieVersion
     ),
     addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
-    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4")
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4"),
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4"),
+    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8")
   )
+
+wartremoverErrors ++= Warts.unsafe
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -57,4 +66,6 @@ scalacOptions ++= Seq(
   "-language:postfixOps",
   "-feature",
   "-Ypartial-unification",
+  "-Xfatal-warnings",
+  "-Xlint"
 )

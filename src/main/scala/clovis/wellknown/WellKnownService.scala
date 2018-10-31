@@ -29,19 +29,27 @@ trait WellKnownService[F[_]] {
   def hostMeta: F[HostMeta]
 }
 
-class WellKnownSvcImpl[F[_] : Monad, G[_]](
+class WellKnownSvcImpl[F[_]: Monad, G[_]](
   localDomain: String,
   alternateDomains: List[String],
   accountDatabase: AccountDatabase[G]
 )(
   implicit tx: G ~> F
-)
-  extends WellKnownService[F] {
+) extends WellKnownService[F] {
   private val F = Applicative[F]
 
-
   override def hostMeta: F[HostMeta] =
-    F.pure(HostMeta(Seq(Link("lrdd", Some("application/xrd+xml"), None, template = Some(s"https://$localDomain/.well-known/webfinger?resource={uri}")))))
+    F.pure(
+      HostMeta(
+        Seq(
+          Link(
+            "lrdd",
+            Some("application/xrd+xml"),
+            None,
+            None,
+            None,
+            Some(s"https://$localDomain/.well-known/webfinger?resource={uri}")
+          ))))
 
   override def webfinger(acct: String): F[Option[WebfingerResult]] = {
     val User = "acct:(.*)@(.*)".r
@@ -62,9 +70,24 @@ class WellKnownSvcImpl[F[_] : Monad, G[_]](
 
   private def toWebfingerResult(account: AccountRow): WebfingerResult = {
     val links = List(
-      Link("http://webfinger.net/rel/profile-page", Some("text/html"), Some(shortAccountURL(account))),
-      Link("http://schemas.google.com/g/2010#updates-from", Some("application/atom+xml"), Some(accountURL(account, Some("atom")))),
-      Link("self", Some("application/activity+json"), Some(accountURL(account, None))),
+      Link("http://webfinger.net/rel/profile-page",
+           Some("text/html"),
+           Some(shortAccountURL(account)),
+           None,
+           None,
+           None),
+      Link("http://schemas.google.com/g/2010#updates-from",
+           Some("application/atom+xml"),
+           Some(accountURL(account, Some("atom"))),
+           None,
+           None,
+           None),
+      Link("self",
+           Some("application/activity+json"),
+           Some(accountURL(account, None)),
+           None,
+           None,
+           None),
     )
 
     WebfingerResult(new URI(s"acct:${account.username}@$localDomain"), None, Some(links), None)
