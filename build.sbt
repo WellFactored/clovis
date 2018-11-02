@@ -43,6 +43,8 @@ lazy val root = (project in file("."))
 
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
 
+      "com.wellfactored" %% "property-info" % "1.1.1",
+
       "com.beachape" %% "enumeratum" % enumeratumVersion,
       "com.beachape" %% "enumeratum-circe" % enumeratumVersion,
 
@@ -58,6 +60,7 @@ lazy val root = (project in file("."))
   )
 
 wartremoverErrors ++= Warts.unsafe
+wartremoverErrors -= Wart.Any
 
 scalacOptions ++= Seq(
   "-deprecation",

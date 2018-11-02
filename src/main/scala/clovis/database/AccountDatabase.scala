@@ -18,9 +18,12 @@
 package clovis.database
 
 import cats.~>
+import clovis.database.rows.{AccountId, AccountRow}
+import com.wellfactored.propertyinfo._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
-import clovis.database.rows.{AccountId, AccountRow}
+import doobie.util.fragment.Fragment
+import shapeless.{LabelledGeneric, Typeable}
 
 case class FollowCounts(followers: Int, following: Int)
 
@@ -30,9 +33,22 @@ trait AccountDatabase[F[_]] {
   def accountWithFollows(id: AccountId): F[Option[(AccountRow, FollowCounts, Int)]]
 }
 
+object DoobieAccountDB extends PropertyInfoGen {
+  def decamelise(s: String): String = s.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase
+
+  implicit val lg: LabelledGeneric[AccountRow] = LabelledGeneric[AccountRow]
+  implicit val t: Typeable[AccountRow]         = Typeable[AccountRow]
+  val pi: PropertyInfo[AccountRow]             = implicitly[PropertyInfo[AccountRow]]
+
+  val fieldNames: String = pi.namesAndTypes.map(_.name).map(decamelise).mkString(", ")
+
+  val allColumns: Fragment = Fragment.const0(fieldNames)
+}
+
 class DoobieAccountDB extends AccountDatabase[ConnectionIO] with MetaHelpers {
   private val selectAccount =
-    fr"""select username, domain, display_name, locked, created_at, note, url, avatar, avatar_static, header, header_static, moved_to_account_id, actor_type, id from account"""
+    fr"""select""" ++ DoobieAccountDB.allColumns ++ fr"""from account"""
+
   override def accountById(id: AccountId): ConnectionIO[Option[AccountRow]] =
     (selectAccount ++ fr"""where id = $id""")
       .query[AccountRow]

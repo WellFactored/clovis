@@ -32,7 +32,7 @@ case class AccountRow(
   avatarStatic: URL,
   header: URL,
   headerStatic: URL,
-  movedToAccount: Option[AccountId],
+  movedToAccountId: Option[AccountId],
   actorType: ActorType,
   id: AccountId
 )
