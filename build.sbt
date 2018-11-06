@@ -52,7 +52,7 @@ lazy val root = (project in file("."))
       "org.tpolecat" %% "doobie-postgres" % doobieVersion,
       "org.tpolecat" %% "doobie-scalatest" % doobieVersion
     ),
-    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
+    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4"),
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4"),
