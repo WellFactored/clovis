@@ -7,7 +7,7 @@ val Specs2Version = "4.2.0"
 val LogbackVersion = "1.2.3"
 
 val enumeratumVersion = "1.5.13"
-lazy val doobieVersion = "0.6.0-RC1"
+lazy val doobieVersion = "0.6.0"
 val circeVersion = "0.10.0"
 
 organizationName := "Well-Factored Software Ltd."
