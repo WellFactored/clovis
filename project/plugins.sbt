@@ -7,7 +7,7 @@ addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")
 
 addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.0.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.3.10")
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.3.12")
 
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.3.7")
 
