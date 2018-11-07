@@ -43,7 +43,7 @@ lazy val root = (project in file("."))
 
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
 
-      "com.wellfactored" %% "property-info" % "1.1.1",
+      "com.wellfactored" %% "property-info" % "1.1.3",
 
       "com.beachape" %% "enumeratum" % enumeratumVersion,
       "com.beachape" %% "enumeratum-circe" % enumeratumVersion,
