@@ -31,6 +31,8 @@ import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 
+import scala.util.Try
+
 object ClovisServer extends IOApp {
   val xa: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
     "org.postgresql.Driver", // driver classname
@@ -46,7 +48,7 @@ object ClovisServer extends IOApp {
 
   val localDomain = "scala.haus"
 
-  val accountDB: DoobieAccountDB         = new DoobieAccountDB
+  val accountDB:      DoobieAccountDB    = new DoobieAccountDB
   val accountService: AccountService[IO] = new AccountSvcImpl[IO, ConnectionIO](accountDB)
   val webfingerService: WellKnownService[IO] =
     new WellKnownSvcImpl[IO, ConnectionIO](localDomain, List(localDomain), accountDB)
@@ -60,17 +62,18 @@ object ClovisServer extends IOApp {
 }
 
 object ClovisStream {
-  def stream[F[_]: ConcurrentEffect](
-    accountService: AccountService[F],
-    webfingerService: WellKnownService[F]): fs2.Stream[F, ExitCode] = {
+  def stream[F[_]: ConcurrentEffect](accountService: AccountService[F], webfingerService: WellKnownService[F]): fs2.Stream[F, ExitCode] = {
     val services: Seq[MountableService[F]] = List(
       new AccountsRoutes[F](accountService),
       new WellKnownRoutes[F](webfingerService)
     )
 
     val router = Router(services.map(s => s.mountPoint -> s.routes): _*).orNotFound
-    
-    val port = Option(System.getProperty("http.port")).map(_.toInt).getOrElse(8080)
+
+    val port =
+      Option(System.getProperty("http.port"))
+        .flatMap(s => Try(s.toInt).toOption)
+        .getOrElse(8080)
 
     BlazeServerBuilder[F]
       .bindHttp(port, "0.0.0.0")

@@ -21,28 +21,26 @@ import java.net.URL
 
 import cats.effect.Sync
 import cats.implicits._
+import clovis.entities.{Account, EntityId}
+import clovis.services.AccountService
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.{Encoder, Json}
 import org.http4s.HttpRoutes
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import clovis.entities.{Account, EntityId}
-import clovis.services.AccountService
 
 import scala.util.Try
 
-class AccountsRoutes[F[_]: Sync](accountService: AccountService[F])
-    extends Http4sDsl[F]
-    with MountableService[F] {
+class AccountsRoutes[F[_]: Sync](accountService: AccountService[F]) extends Http4sDsl[F] with MountableService[F] {
 
-  object MaxId          extends OptionalQueryParamDecoderMatcher[Long]("max_id")
-  object SinceId        extends OptionalQueryParamDecoderMatcher[Long]("since_id")
-  object Limit          extends OptionalQueryParamDecoderMatcher[Int]("limit")
-  object OnlyMedia      extends OptionalQueryParamDecoderMatcher[Boolean]("only_media")
-  object Pinned         extends OptionalQueryParamDecoderMatcher[Boolean]("pinned")
+  object MaxId extends OptionalQueryParamDecoderMatcher[Long]("max_id")
+  object SinceId extends OptionalQueryParamDecoderMatcher[Long]("since_id")
+  object Limit extends OptionalQueryParamDecoderMatcher[Int]("limit")
+  object OnlyMedia extends OptionalQueryParamDecoderMatcher[Boolean]("only_media")
+  object Pinned extends OptionalQueryParamDecoderMatcher[Boolean]("pinned")
   object ExcludeReplies extends OptionalQueryParamDecoderMatcher[Boolean]("exclude_replies")
-  object AccountIds     extends OptionalMultiQueryParamDecoderMatcher[String]("id")
+  object AccountIds extends OptionalMultiQueryParamDecoderMatcher[String]("id")
 
   implicit val urlEncoder: Encoder[URL] = Encoder.instance(url => Json.fromString(url.toString))
   implicit def entityIDEncoder[T]: Encoder[EntityId[T]] =
@@ -91,8 +89,7 @@ class AccountsRoutes[F[_]: Sync](accountService: AccountService[F])
         NotImplemented()
 
       case GET -> Root / LongVar(id) / "statuses"
-            :? OnlyMedia(onlyMedia) +& Pinned(pinned) +& ExcludeReplies(excludeReplies) +& MaxId(
-              maxId) +& SinceId(sinceId) +& Limit(limt) =>
+            :? OnlyMedia(onlyMedia) +& Pinned(pinned) +& ExcludeReplies(excludeReplies) +& MaxId(maxId) +& SinceId(sinceId) +& Limit(limt) =>
         NotImplemented()
 
       case POST -> Root / LongVar(id) / "follow" =>
