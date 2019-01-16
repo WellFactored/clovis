@@ -69,9 +69,11 @@ object ClovisStream {
     )
 
     val router = Router(services.map(s => s.mountPoint -> s.routes): _*).orNotFound
+    
+    val port = Option(System.getProperty("http.port")).map(_.toInt).getOrElse(8080)
 
     BlazeServerBuilder[F]
-      .bindHttp(8080, "0.0.0.0")
+      .bindHttp(port, "0.0.0.0")
       .withHttpApp(router)
       .serve
   }
