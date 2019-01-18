@@ -20,6 +20,7 @@ jobs:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       TERM: dumb
+      CODECOV_TOKEN: "a7c6edf6-d78b-4b35-97e0-31ca5741b769"
 
     steps:
     - checkout
