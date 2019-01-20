@@ -17,9 +17,12 @@
 
 package clovis
 
+import cats.data.EitherT
 import cats.effect._
 import cats.implicits._
 import cats.~>
+import ciris.cats._
+import ciris.{envF, _}
 import clovis.database.DoobieAccountDB
 import clovis.services.{AccountService, AccountSvcImpl}
 import clovis.wellknown.{WellKnownRoutes, WellKnownService, WellKnownSvcImpl}
@@ -46,19 +49,28 @@ object ClovisServer extends IOApp {
       fa.transact(xa)
   }
 
-  val localDomain = "scala.haus"
+  private val localDomain = envF[IO, Option[String]]("LOCAL_DOMAIN").mapValue(_.getOrElse("scala.haus"))
+
+  val config: EitherT[IO, ConfigErrors, String] = EitherT(loadConfig(localDomain)(identity).result)
 
   val accountDB:      DoobieAccountDB    = new DoobieAccountDB
   val accountService: AccountService[IO] = new AccountSvcImpl[IO, ConnectionIO](accountDB)
-  val webfingerService: WellKnownService[IO] =
-    new WellKnownSvcImpl[IO, ConnectionIO](localDomain, List(localDomain), accountDB)
+  val webfingerService: IO[Either[ConfigErrors, WellKnownService[IO]]] =
+    config.map { ld =>
+      new WellKnownSvcImpl[IO, ConnectionIO](ld, List(ld), accountDB)
+    }.value
 
-  def run(args: List[String]): IO[ExitCode] = {
-    // annotate to keep wartremover happy
-    val compile =
-      ClovisStream.stream[IO](accountService, webfingerService).compile[IO, IO, ExitCode]
-    compile.drain.as(ExitCode.Success)
-  }
+  def run(args: List[String]): IO[ExitCode] =
+    webfingerService.flatMap {
+      case Left(errs) =>
+        errs.messages.foreach(System.err.println)
+        IO.pure(ExitCode.Error)
+
+      case Right(ws) =>
+        val compile =
+          ClovisStream.stream[IO](accountService, ws).compile[IO, IO, ExitCode]
+        compile.drain.as(ExitCode.Success)
+    }
 }
 
 object ClovisStream {
