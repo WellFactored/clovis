@@ -52,13 +52,10 @@ class DoobieAccountDB extends AccountDatabase[ConnectionIO] with MetaHelpers {
   private val selectAccount =
     fr"""select""" ++ DoobieAccountDB.allColumns ++ fr""" from account"""
 
-  override def accountById(id: AccountId): ConnectionIO[Option[AccountRow]] = {
-    val query = selectAccount ++ fr"""where id = $id"""
-    println(query)
-    query
+  override def accountById(id: AccountId): ConnectionIO[Option[AccountRow]] =
+    (selectAccount ++ fr"""where id = $id""")
       .query[AccountRow]
       .option
-  }
 
   private def followCounts(id: AccountId): ConnectionIO[FollowCounts] =
     sql"select  count(distinct fr.follower_id), count(distinct fd.followed_id) from follow fr, follow fd where fd.follower_id = $id and fr.followed_id = $id"
@@ -81,13 +78,10 @@ class DoobieAccountDB extends AccountDatabase[ConnectionIO] with MetaHelpers {
     case (None, _, _)    => None
   }
 
-  override def accountByName(name: String): ConnectionIO[Option[AccountRow]] = {
-    val fragment = selectAccount ++ fr"where username = $name and domain is null"
-    println(fragment)
-    fragment
+  override def accountByName(name: String): ConnectionIO[Option[AccountRow]] =
+    (selectAccount ++ fr"where username = $name and domain is null")
       .query[AccountRow]
       .option
-  }
 }
 
 class EmbeddedAccountDB[F[_]](doobie: DoobieAccountDB, tx: ConnectionIO ~> F) extends AccountDatabase[F] {
