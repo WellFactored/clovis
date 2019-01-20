@@ -44,7 +44,7 @@ object DoobieAccountDB extends PropertyInfoGen {
   val allColumns: Fragment = Fragment.const0(fieldNames)
 
   // Experimental attempt at generating DDL for creating table
-  def main(args: Array[String]): Unit =
+  def ddl: Unit =
     pi.namesAndTypes.map(t => ColumnDecl(decamelise(t.name), SQLType.sqlTypeFor(t.ty.describe))).foreach(d => println(d.colDDL))
 }
 
