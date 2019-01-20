@@ -17,12 +17,9 @@
 
 package clovis
 
-import cats.data.EitherT
 import cats.effect._
 import cats.implicits._
 import cats.~>
-import ciris.cats._
-import ciris.{envF, _}
 import clovis.database.DoobieAccountDB
 import clovis.services.{AccountService, AccountSvcImpl}
 import clovis.wellknown.{WellKnownRoutes, WellKnownService, WellKnownSvcImpl}
@@ -49,18 +46,9 @@ object ClovisServer extends IOApp {
       fa.transact(xa(url, user, password))
   }
 
-  case class Config(localDomain: String, dbURL: String, dbUser: String, dbPassword: String)
-
-  private val localDomain = envF[IO, Option[String]]("LOCAL_DOMAIN").mapValue(_.getOrElse("scala.haus"))
-  private val dbURL       = envF[IO, Option[String]]("JDBC_DATABASE_URL").mapValue(_.getOrElse("jdbc:postgresql:clovis"))
-  private val dbUser      = envF[IO, Option[String]]("JDBC_DATABASE_USERNAME").mapValue(_.getOrElse("clovis"))
-  private val dbPassword  = envF[IO, Option[String]]("JDBC_DATABASE_PASSWORD").mapValue(_.getOrElse(""))
-
-  val config: EitherT[IO, ConfigErrors, Config] = EitherT(loadConfig(localDomain, dbURL, dbUser, dbPassword)(Config).result)
-
   val accountDB: DoobieAccountDB = new DoobieAccountDB
 
-  val stream: IO[ExitCode] = config.value.flatMap {
+  val stream: IO[ExitCode] = Config.load.flatMap {
     case Left(errs) =>
       errs.messages.foreach(System.err.println)
       IO.pure(ExitCode.Error)
