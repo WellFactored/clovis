@@ -37,40 +37,47 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import scala.util.Try
 
 object ClovisServer extends IOApp {
-  val xa: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
+  def xa(url: String, user: String, password: String): Aux[IO, Unit] = Transactor.fromDriverManager[IO](
     "org.postgresql.Driver", // driver classname
-    "jdbc:postgresql:clovis", // connect URL (driver-specific)
-    "clovis", // user
-    "" // password
+    url,
+    user,
+    password
   )
 
-  implicit val tx: ConnectionIO ~> IO = new ~>[ConnectionIO, IO] {
+  def tx(url: String, user: String, password: String): ConnectionIO ~> IO = new ~>[ConnectionIO, IO] {
     override def apply[A](fa: ConnectionIO[A]): IO[A] =
-      fa.transact(xa)
+      fa.transact(xa(url, user, password))
   }
 
+  case class Config(localDomain: String, dbURL: String, dbUser: String, dbPassword: String)
+
   private val localDomain = envF[IO, Option[String]]("LOCAL_DOMAIN").mapValue(_.getOrElse("scala.haus"))
+  private val dbURL       = envF[IO, Option[String]]("JDBC_DATABASE_URL").mapValue(_.getOrElse("jdbc:postgresql:clovis"))
+  private val dbUser      = envF[IO, Option[String]]("JDBC_DATABASE_USER").mapValue(_.getOrElse("clovis"))
+  private val dbPassword  = envF[IO, Option[String]]("JDBC_DATABASE_PASSWORD").mapValue(_.getOrElse(""))
 
-  val config: EitherT[IO, ConfigErrors, String] = EitherT(loadConfig(localDomain)(identity).result)
+  val config: EitherT[IO, ConfigErrors, Config] = EitherT(loadConfig(localDomain, dbURL, dbUser, dbPassword)(Config).result)
 
-  val accountDB:      DoobieAccountDB    = new DoobieAccountDB
-  val accountService: AccountService[IO] = new AccountSvcImpl[IO, ConnectionIO](accountDB)
-  val webfingerService: IO[Either[ConfigErrors, WellKnownService[IO]]] =
-    config.map { ld =>
-      new WellKnownSvcImpl[IO, ConnectionIO](ld, List(ld), accountDB)
-    }.value
+  val accountDB: DoobieAccountDB = new DoobieAccountDB
+
+  val stream: IO[ExitCode] = config.value.flatMap {
+    case Left(errs) =>
+      errs.messages.foreach(System.err.println)
+      IO.pure(ExitCode.Error)
+
+    case Right(c) =>
+      implicit val txx:     ConnectionIO ~> IO   = tx(c.dbURL, c.dbUser, c.dbPassword)
+      val accountService:   AccountService[IO]   = new AccountSvcImpl[IO, ConnectionIO](accountDB)
+      val webfingerService: WellKnownService[IO] = new WellKnownSvcImpl[IO, ConnectionIO](c.localDomain, List(c.localDomain), accountDB)
+      ClovisStream
+        .stream[IO](accountService, webfingerService)
+        .compile[IO, IO, ExitCode]
+        .drain
+        .as(ExitCode.Success)
+  }
 
   def run(args: List[String]): IO[ExitCode] =
-    webfingerService.flatMap {
-      case Left(errs) =>
-        errs.messages.foreach(System.err.println)
-        IO.pure(ExitCode.Error)
-
-      case Right(ws) =>
-        val compile =
-          ClovisStream.stream[IO](accountService, ws).compile[IO, IO, ExitCode]
-        compile.drain.as(ExitCode.Success)
-    }
+    stream
 }
 
 object ClovisStream {
