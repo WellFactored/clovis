@@ -53,7 +53,7 @@ object ClovisServer extends IOApp {
 
   private val localDomain = envF[IO, Option[String]]("LOCAL_DOMAIN").mapValue(_.getOrElse("scala.haus"))
   private val dbURL       = envF[IO, Option[String]]("JDBC_DATABASE_URL").mapValue(_.getOrElse("jdbc:postgresql:clovis"))
-  private val dbUser      = envF[IO, Option[String]]("JDBC_DATABASE_USER").mapValue(_.getOrElse("clovis"))
+  private val dbUser      = envF[IO, Option[String]]("JDBC_DATABASE_USERNAME").mapValue(_.getOrElse("clovis"))
   private val dbPassword  = envF[IO, Option[String]]("JDBC_DATABASE_PASSWORD").mapValue(_.getOrElse(""))
 
   val config: EitherT[IO, ConfigErrors, Config] = EitherT(loadConfig(localDomain, dbURL, dbUser, dbPassword)(Config).result)
