@@ -23,13 +23,13 @@ import com.wellfactored.propertyinfo._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.fragment.Fragment
-import shapeless.{LabelledGeneric, Typeable}
+import shapeless.LabelledGeneric
 
 case class FollowCounts(followers: Int, following: Int)
 
 trait AccountDatabase[F[_]] {
-  def accountById(id: AccountId): F[Option[AccountRow]]
-  def accountByName(name: String): F[Option[AccountRow]]
+  def accountById(id:        AccountId): F[Option[AccountRow]]
+  def accountByName(name:    String):    F[Option[AccountRow]]
   def accountWithFollows(id: AccountId): F[Option[(AccountRow, FollowCounts, Int)]]
 }
 
@@ -37,12 +37,15 @@ object DoobieAccountDB extends PropertyInfoGen {
   def decamelise(s: String): String = s.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase
 
   implicit val lg: LabelledGeneric[AccountRow] = LabelledGeneric[AccountRow]
-  implicit val t: Typeable[AccountRow]         = Typeable[AccountRow]
-  val pi: PropertyInfo[AccountRow]             = implicitly[PropertyInfo[AccountRow]]
+  val pi:          PropertyInfo[AccountRow]    = implicitly[PropertyInfo[AccountRow]]
 
   val fieldNames: String = pi.namesAndTypes.map(_.name).map(decamelise).mkString(", ")
 
   val allColumns: Fragment = Fragment.const0(fieldNames)
+
+  // Experimental attempt at generating DDL for creating table
+  def main(args: Array[String]): Unit =
+    pi.namesAndTypes.map(t => ColumnDecl(decamelise(t.name), SQLType.sqlTypeFor(t.ty.describe))).foreach(d => println(d.colDDL))
 }
 
 class DoobieAccountDB extends AccountDatabase[ConnectionIO] with MetaHelpers {
@@ -81,10 +84,9 @@ class DoobieAccountDB extends AccountDatabase[ConnectionIO] with MetaHelpers {
       .option
 }
 
-class EmbeddedAccountDB[F[_]](doobie: DoobieAccountDB, tx: ConnectionIO ~> F)
-    extends AccountDatabase[F] {
-  override def accountById(id: AccountId): F[Option[AccountRow]]  = tx(doobie.accountById(id))
-  override def accountByName(name: String): F[Option[AccountRow]] = tx(doobie.accountByName(name))
+class EmbeddedAccountDB[F[_]](doobie: DoobieAccountDB, tx: ConnectionIO ~> F) extends AccountDatabase[F] {
+  override def accountById(id:        AccountId): F[Option[AccountRow]] = tx(doobie.accountById(id))
+  override def accountByName(name:    String): F[Option[AccountRow]] = tx(doobie.accountByName(name))
   override def accountWithFollows(id: AccountId): F[Option[(AccountRow, FollowCounts, Int)]] =
     tx(doobie.accountWithFollows(id))
 }
