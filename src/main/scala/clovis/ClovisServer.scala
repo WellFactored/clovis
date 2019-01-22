@@ -20,71 +20,32 @@ package clovis
 import cats.effect._
 import cats.implicits._
 import cats.~>
+import ciris.cats.effect._
 import clovis.database.DoobieAccountDB
 import clovis.services.{AccountService, AccountSvcImpl}
-import clovis.wellknown.{WellKnownRoutes, WellKnownService, WellKnownServiceImpl}
-import doobie.free.connection.ConnectionIO
-import doobie.implicits._
-import doobie.util.transactor.Transactor
-import doobie.util.transactor.Transactor.Aux
-import org.http4s.implicits._
-import org.http4s.server.Router
-import org.http4s.server.blaze.BlazeServerBuilder
+import clovis.wellknown.{WellKnownService, WellKnownServiceImpl}
 
-import scala.util.Try
-
-object ClovisServer extends IOApp {
-  def xa(url: String, user: String, password: String): Aux[IO, Unit] = Transactor.fromDriverManager[IO](
-    "org.postgresql.Driver", // driver classname
-    url,
-    user,
-    password
-  )
-
-  def tx(url: String, user: String, password: String): ConnectionIO ~> IO = new ~>[ConnectionIO, IO] {
-    override def apply[A](fa: ConnectionIO[A]): IO[A] =
-      fa.transact(xa(url, user, password))
-  }
-
-  val accountDB: DoobieAccountDB = new DoobieAccountDB
-
-  val stream: IO[ExitCode] = Config.load.flatMap {
-    case Left(errs) =>
-      errs.messages.foreach(System.err.println)
-      IO.pure(ExitCode.Error)
-
-    case Right(c) =>
-      implicit val txx:     ConnectionIO ~> IO   = tx(c.dbURL, c.dbUser, c.dbPassword)
-      val accountService:   AccountService[IO]   = new AccountSvcImpl[IO, ConnectionIO](accountDB)
-      val webfingerService: WellKnownService[IO] = new WellKnownServiceImpl[IO, ConnectionIO](c.localDomain, List(c.localDomain), accountDB)
-      ClovisStream
-        .stream[IO](accountService, webfingerService)
-        .compile[IO, IO, ExitCode]
-        .drain
-        .as(ExitCode.Success)
-  }
+object ClovisServer extends IOApp with TransactionSupport {
+  private val configLoader = new ConfigLoader[IO]
+  private val accountDB: DoobieAccountDB = new DoobieAccountDB
 
   def run(args: List[String]): IO[ExitCode] =
-    stream
+    configLoader.load.flatMap {
+      case Left(errs) =>
+        errs.messages.foreach(System.err.println)
+        IO.pure(ExitCode.Error)
+
+      case Right(c) =>
+        implicit val txK:     ConnectionType ~> IO = tx(c.dbConfig)
+        val accountService:   AccountService[IO]   = new AccountSvcImpl[IO, ConnectionType](accountDB)
+        val webfingerService: WellKnownService[IO] = new WellKnownServiceImpl[IO, ConnectionType](c.localDomain, List(c.localDomain), accountDB)
+
+        ClovisStream
+          .stream[IO](accountService, webfingerService)
+          .compile[IO, IO, ExitCode]
+          .drain
+          .as(ExitCode.Success)
+    }
 }
 
-object ClovisStream {
-  def stream[F[_]: ConcurrentEffect](accountService: AccountService[F], webfingerService: WellKnownService[F]): fs2.Stream[F, ExitCode] = {
-    val services: Seq[MountableService[F]] = List(
-      new AccountsRoutes[F](accountService),
-      new WellKnownRoutes[F](webfingerService)
-    )
 
-    val router = Router(services.map(s => s.mountPoint -> s.routes): _*).orNotFound
-
-    val port =
-      Option(System.getProperty("http.port"))
-        .flatMap(s => Try(s.toInt).toOption)
-        .getOrElse(8080)
-
-    BlazeServerBuilder[F]
-      .bindHttp(port, "0.0.0.0")
-      .withHttpApp(router)
-      .serve
-  }
-}

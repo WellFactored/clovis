@@ -18,20 +18,22 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
   val unknownAccount       = "unknown"
   private val hostMetaPath = "/host-meta"
 
-  private val dummyAccountDB = new AccountDatabase[IO] {
-    override def accountById(id:        AccountId): IO[Option[AccountRow]]                      = ???
-    override def accountByName(name:    String):    IO[Option[AccountRow]]                      = ???
-    override def accountWithFollows(id: AccountId): IO[Option[(AccountRow, FollowCounts, Int)]] = ???
+  type F[A] = IO[A]
+
+  private val dummyAccountDB = new AccountDatabase[F] {
+    override def accountById(id:        AccountId): F[Option[AccountRow]]                      = ???
+    override def accountByName(name:    String):    F[Option[AccountRow]]                      = ???
+    override def accountWithFollows(id: AccountId): F[Option[(AccountRow, FollowCounts, Int)]] = ???
   }
 
-  implicit val idK: FunctionK[IO, IO] = FunctionK.id[IO]
+  implicit val idK: FunctionK[F, F] = FunctionK.id[F]
 
-  private val service = new WellKnownServiceImpl[IO, IO]("local.domain", List("local.domain"), dummyAccountDB)
-  private val routes: HttpRoutes[IO] = new WellKnownRoutes[IO](service).routes
+  private val service = new WellKnownServiceImpl[F, F]("local.domain", List("local.domain"), dummyAccountDB)
+  private val routes: HttpRoutes[F] = new WellKnownRoutes[F](service).routes
 
   "calling host-meta with no Accept header" - {
-    val request:  Request[IO]  = Request[IO](Method.GET, Uri(path = hostMetaPath))
-    val response: Response[IO] = routeRequest(request)
+    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath))
+    val response: Response[F] = routeRequest(request)
 
     "should respond with an OK" in {
       response.status.code shouldBe 200
@@ -46,8 +48,8 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
   }
 
   "calling host-meta with Accept=application/json" - {
-    val request:  Request[IO]  = Request[IO](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/json")))
-    val response: Response[IO] = routeRequest(request)
+    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/json")))
+    val response: Response[F] = routeRequest(request)
 
     "should respond with an OK" in {
       response.status.code shouldBe 200
@@ -61,7 +63,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
     }
   }
 
-  private def routeRequest(request: Request[IO]): Response[IO] =
+  private def routeRequest(request: Request[F]): Response[F] =
     routes(request).value.unsafeRunSync() match {
       case None           => fail(s"No route was found to handle ${request.uri.toString()}")
       case Some(response) => response

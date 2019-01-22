@@ -20,7 +20,8 @@ package wellknown
 
 import java.net.URI
 
-import cats.effect._
+import cats.effect.IO
+import cats.syntax.applicative._
 import io.circe.generic.auto._
 import org.http4s._
 import org.http4s.circe.CirceEntityDecoder._
@@ -33,19 +34,21 @@ class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues w
   val knownAcctURI          = new URI("/known/uri")
   private val webfingerPath = "/webfinger"
 
-  private val service = new WellKnownService[IO] {
-    override def webfinger(acct: String): IO[Option[WebfingerResult]] =
-      if (acct == knownAccount) IO.pure(Some(WebfingerResult(knownAcctURI, None, None, None)))
-      else IO.pure(None)
-    override def hostMeta: IO[HostMeta] = IO.pure(HostMeta(Seq()))
+  type F[A] = IO[A]
+
+  private val service = new WellKnownService[F] {
+    override def webfinger(acct: String): F[Option[WebfingerResult]] =
+      if (acct == knownAccount) Some(WebfingerResult(knownAcctURI, None, None, None)).pure[F]
+      else None.pure[F]
+    override def hostMeta: F[HostMeta] = HostMeta(Seq()).pure[F]
   }
 
-  private val routes: HttpRoutes[IO] = new WellKnownRoutes[IO](service).routes
+  private val routes: HttpRoutes[F] = new WellKnownRoutes[F](service).routes
 
   "calling webfinger" - {
     "on a known account" - {
-      val request:  Request[IO]  = Request[IO](Method.GET, buildUri(Some(knownAccount)))
-      val response: Response[IO] = routeRequest(request)
+      val request:  Request[F]  = Request[F](Method.GET, buildUri(Some(knownAccount)))
+      val response: Response[F] = routeRequest(request)
 
       "should respond with an OK" in {
         response.status.code shouldBe 200
@@ -58,17 +61,17 @@ class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues w
     }
 
     "on an unknown account should respond with 404" in {
-      val request = Request[IO](Method.GET, buildUri(Some(unknownAccount)))
+      val request = Request[F](Method.GET, buildUri(Some(unknownAccount)))
       routeRequest(request).status.code shouldBe 404
     }
 
     "with no account value should respond with 404" in {
-      val request = Request[IO](Method.GET, buildUri(None))
+      val request = Request[F](Method.GET, buildUri(None))
       routes.orNotFound(request).unsafeRunSync().status.code shouldBe 404
     }
 
     "with no account parameter should respond with 404" in {
-      val request = Request[IO](Method.GET, Uri(path = webfingerPath))
+      val request = Request[F](Method.GET, Uri(path = webfingerPath))
       routes.orNotFound(request).unsafeRunSync().status.code shouldBe 404
     }
   }
@@ -76,7 +79,7 @@ class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues w
   private def buildUri(account: Option[String]): Uri =
     Uri(path = webfingerPath, query = Query("resource" -> account))
 
-  private def routeRequest(request: Request[IO]): Response[IO] =
+  private def routeRequest(request: Request[F]): Response[F] =
     routes(request).value.unsafeRunSync() match {
       case None           => fail(s"No route was found to handle ${request.uri.toString()}")
       case Some(response) => response
