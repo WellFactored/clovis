@@ -22,7 +22,7 @@ import cats.implicits._
 import cats.~>
 import clovis.database.DoobieAccountDB
 import clovis.services.{AccountService, AccountSvcImpl}
-import clovis.wellknown.{WellKnownRoutes, WellKnownService, WellKnownSvcImpl}
+import clovis.wellknown.{WellKnownRoutes, WellKnownService, WellKnownServiceImpl}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
@@ -56,7 +56,7 @@ object ClovisServer extends IOApp {
     case Right(c) =>
       implicit val txx:     ConnectionIO ~> IO   = tx(c.dbURL, c.dbUser, c.dbPassword)
       val accountService:   AccountService[IO]   = new AccountSvcImpl[IO, ConnectionIO](accountDB)
-      val webfingerService: WellKnownService[IO] = new WellKnownSvcImpl[IO, ConnectionIO](c.localDomain, List(c.localDomain), accountDB)
+      val webfingerService: WellKnownService[IO] = new WellKnownServiceImpl[IO, ConnectionIO](c.localDomain, List(c.localDomain), accountDB)
       ClovisStream
         .stream[IO](accountService, webfingerService)
         .compile[IO, IO, ExitCode]

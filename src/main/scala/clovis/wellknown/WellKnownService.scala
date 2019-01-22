@@ -29,7 +29,7 @@ trait WellKnownService[F[_]] {
   def hostMeta: F[HostMeta]
 }
 
-class WellKnownSvcImpl[F[_]: Monad, G[_]](
+class WellKnownServiceImpl[F[_]: Monad, G[_]](
   localDomain:      String,
   alternateDomains: List[String],
   accountDatabase:  AccountDatabase[G]
