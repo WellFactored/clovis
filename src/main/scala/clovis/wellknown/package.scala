@@ -19,15 +19,14 @@ package clovis.wellknown
 
 import java.net.URI
 
-case class Link(rel: String,
-                `type`: Option[String],
-                href: Option[URI],
-                titles: Option[Map[String, String]],
-                properties: Option[Map[URI, Option[String]]],
-                template: Option[String])
-case class WebfingerResult(subject: URI,
-                           aliases: Option[List[URI]],
-                           links: Option[List[Link]],
-                           properties: Option[Map[URI, Option[String]]])
+case class Link(
+  rel:        String,
+  `type`:     Option[String],
+  href:       Option[URI],
+  titles:     Option[Map[String, String]],
+  properties: Option[Map[URI, Option[String]]],
+  template:   Option[String])
+
+case class WebfingerResult(subject: URI, aliases: Option[List[URI]], links: Option[List[Link]], properties: Option[Map[URI, Option[String]]])
 
 case class HostMeta(links: Seq[Link])

@@ -28,16 +28,15 @@ import org.http4s.dsl.io._
 import org.scalatest.{EitherValues, FreeSpecLike, Matchers, OptionValues}
 
 class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues with EitherValues {
-  val knownAccount   = "known"
-  val unknownAccount = "unknown"
-  val knownAcctURI   = new URI("/known/uri")
+  val knownAccount          = "known"
+  val unknownAccount        = "unknown"
+  val knownAcctURI          = new URI("/known/uri")
   private val webfingerPath = "/webfinger"
 
   private val service = new WellKnownService[IO] {
-    override def webfinger(acct: String): IO[Option[WebfingerResult]] = {
+    override def webfinger(acct: String): IO[Option[WebfingerResult]] =
       if (acct == knownAccount) IO.pure(Some(WebfingerResult(knownAcctURI, None, None, None)))
       else IO.pure(None)
-    }
     override def hostMeta: IO[HostMeta] = IO.pure(HostMeta(Seq()))
   }
 
@@ -45,7 +44,7 @@ class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues w
 
   "calling webfinger" - {
     "on a known account" - {
-      val request: Request[IO] = Request[IO](Method.GET, buildUri(Some(knownAccount)))
+      val request:  Request[IO]  = Request[IO](Method.GET, buildUri(Some(knownAccount)))
       val response: Response[IO] = routeRequest(request)
 
       "should respond with an OK" in {
