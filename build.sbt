@@ -49,8 +49,8 @@ lazy val root = (project in file("."))
     addCompilerPlugin("org.scalamacros" % "paradise"            % "2.1.1" cross CrossVersion.full)
   )
 
-//wartremoverErrors ++= Warts.unsafe
-//wartremoverErrors -= Wart.Any
+wartremoverErrors ++= Warts.unsafe
+wartremoverErrors -= Wart.Any
 
 scalacOptions ++= Seq(
   "-deprecation",
