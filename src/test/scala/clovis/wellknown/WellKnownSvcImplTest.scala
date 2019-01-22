@@ -14,8 +14,15 @@ class WellKnownSvcImplTest extends WordSpecLike with Matchers with OptionValues 
   val service = new WellKnownSvcImpl[Id, Id]("test.domain", List("test.domain"), fakeAccountDatabase)
 
   "webfinger" should {
-    "return a result for a known user" in {
+    "return a webfinger result for a known user" in {
       service.webfinger("acct:test1@test.domain") shouldBe a[Some[_]]
+    }
+
+    "not return a result when the user is unknown" in {
+      service.webfinger("acct:unknown@test.domain") shouldBe None
+    }
+    "not return a result when the domain is unknown" in {
+      service.webfinger("acct:test1@unknown.domain") shouldBe None
     }
   }
 
