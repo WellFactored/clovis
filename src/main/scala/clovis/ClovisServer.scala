@@ -41,11 +41,9 @@ object ClovisServer extends IOApp with TransactionSupport {
         val webfingerService: WellKnownService[IO] = new WellKnownServiceImpl[IO, ConnectionType](c.localDomain, List(c.localDomain), accountDB)
 
         ClovisStream
-          .stream[IO](accountService, webfingerService)
+          .stream[IO](c.port, accountService, webfingerService)
           .compile[IO, IO, ExitCode]
           .drain
           .as(ExitCode.Success)
     }
 }
-
-
