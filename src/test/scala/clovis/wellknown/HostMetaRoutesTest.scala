@@ -5,6 +5,8 @@ import cats.arrow.FunctionK
 import cats.effect.IO
 import clovis.database.rows.{AccountId, AccountRow}
 import clovis.database.{AccountDatabase, FollowCounts}
+import io.circe.generic.auto._
+import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.scalaxml.xml
 import org.http4s.{HttpRoutes, Method, Request, Response, _}
 import org.scalatest.{EitherValues, FreeSpecLike, Matchers, OptionValues}
@@ -27,7 +29,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
   private val service = new WellKnownServiceImpl[IO, IO]("local.domain", List("local.domain"), dummyAccountDB)
   private val routes: HttpRoutes[IO] = new WellKnownRoutes[IO](service).routes
 
-  "calling host-meta" - {
+  "calling host-meta with no Accept header" - {
     val request:  Request[IO]  = Request[IO](Method.GET, Uri(path = hostMetaPath))
     val response: Response[IO] = routeRequest(request)
 
@@ -40,6 +42,22 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
       val lrdd = (body \ "Link").find(_.attribute("rel").map(_.text).contains("lrdd"))
 
       (lrdd.value \@ "template") should include("https://local.domain")
+    }
+  }
+
+  "calling host-meta with Accept=application/json" - {
+    val request:  Request[IO]  = Request[IO](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/json")))
+    val response: Response[IO] = routeRequest(request)
+
+    "should respond with an OK" in {
+      response.status.code shouldBe 200
+    }
+
+    "and have the correct data in the body" in {
+      val body = response.as[HostMeta].unsafeRunSync()
+      val lrdd = body.links.find(_.rel.contains("lrdd"))
+
+      lrdd.value.template.value should include("https://local.domain")
     }
   }
 
