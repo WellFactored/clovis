@@ -1,16 +1,15 @@
 package clovis
 package wellknown
 
-import java.io.StringReader
-
 import cats.arrow.FunctionK
 import cats.effect.IO
 import clovis.database.rows.{AccountId, AccountRow}
 import clovis.database.{AccountDatabase, FollowCounts}
+import org.http4s.scalaxml.xml
 import org.http4s.{HttpRoutes, Method, Request, Response, _}
 import org.scalatest.{EitherValues, FreeSpecLike, Matchers, OptionValues}
 
-import scala.xml.XML
+import scala.xml.Elem
 
 class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues with EitherValues {
   val knownAccount         = "known"
@@ -37,10 +36,8 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
     }
 
     "and have the correct data in the body" in {
-
-      val body: String = response.bodyAsText.compile.lastOrError.unsafeRunSync()
-      val xml  = XML.load(new StringReader(body))
-      val lrdd = (xml \ "Link").find(_.attribute("rel").map(_.text).contains("lrdd"))
+      val body = response.as[Elem].unsafeRunSync()
+      val lrdd = (body \ "Link").find(_.attribute("rel").map(_.text).contains("lrdd"))
 
       (lrdd.value \@ "template") should include("https://local.domain")
     }

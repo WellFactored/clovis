@@ -26,8 +26,8 @@ lazy val root = (project in file("."))
       "org.http4s"             %% "http4s-blaze-client" % Http4sVersion,
       "org.http4s"             %% "http4s-circe"        % Http4sVersion,
       "org.http4s"             %% "http4s-dsl"          % Http4sVersion,
+      "org.http4s"             %% "http4s-scala-xml"    % Http4sVersion,
       "is.cir"                 %% "ciris-cats-effect"   % "0.12.1",
-      "org.scala-lang.modules" %% "scala-xml"           % "1.1.1",
       // For auto-derivation of JSON codecs
       "io.circe" %% "circe-generic" % circeVersion,
       //For string interpolation to JSON model
