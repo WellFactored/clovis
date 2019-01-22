@@ -17,5 +17,4 @@ class ConfigLoader[F[_]: Sync: Applicative] {
   private val httpPort = propF[F, Option[Int]]("http.port").mapValue(_.getOrElse(8080))
 
   val load: F[Either[ConfigErrors, Config]] = EitherT(loadConfig(localDomain, httpPort, dbConfig)(Config.apply).result).value
-
 }
