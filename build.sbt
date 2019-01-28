@@ -6,7 +6,7 @@ val Http4sVersion  = "0.19.0"
 val Specs2Version  = "4.2.0"
 val LogbackVersion = "1.2.3"
 
-val enumeratumVersion  = "1.5.13"
+val enumeratumCirceVersion  = "1.5.13"
 lazy val doobieVersion = "0.6.0"
 val circeVersion       = "0.11.1"
 
@@ -38,8 +38,7 @@ lazy val root = (project in file("."))
       "org.scalatest"    %% "scalatest"        % "3.0.5" % "test",
       "ch.qos.logback"   % "logback-classic"   % LogbackVersion,
       "com.wellfactored" %% "property-info"    % "1.1.3",
-      "com.beachape"     %% "enumeratum"       % enumeratumVersion,
-      "com.beachape"     %% "enumeratum-circe" % enumeratumVersion,
+      "com.beachape"     %% "enumeratum-circe" % enumeratumCirceVersion,
       "org.tpolecat"     %% "doobie-core"      % doobieVersion,
       "org.tpolecat"     %% "doobie-postgres"  % doobieVersion,
       "org.tpolecat"     %% "doobie-scalatest" % doobieVersion
