@@ -38,10 +38,12 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends
 
   object Resource extends QueryParamDecoderMatcher[String]("resource")
 
-  private val xrd: MediaType = new MediaType("application", "xrd+xml")
-  //private val jrd    : MediaType      = new MediaType("application", "jrd+json")
+  private val xrd:     MediaType      = new MediaType("application", "xrd+xml")
   private val xrdUTF8: `Content-Type` = `Content-Type`(xrd, Charset.`UTF-8`)
+
+  //private val jrd    : MediaType      = new MediaType("application", "jrd+json")
   //private val jrdUTF8: `Content-Type` = `Content-Type`(jrd, Charset.`UTF-8`)
+
   private val acceptHeader = CaseInsensitiveString("Accept")
 
   override val mountPoint: String = "/.well-known"
@@ -63,13 +65,17 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends
             case _                        => Ok(toXML(hm)).map(_.withContentType(xrdUTF8))
           }
         }
-    }
 
-  private def linksAsXML(links: Seq[Link]): Seq[Elem] =
-    links.map(link => <Link rel="lrdd" type="application/xrd+xml" template={link.template.getOrElse("")}/>)
+      // https://tools.ietf.org/html/rfc6415 allows for calling the host-meta.json instead of using an Accept header
+      case GET -> Root / "host-meta.json" =>
+        wellknownService.hostMeta.flatMap(hm => Ok(hm.asJson.dropNulls))
+    }
 
   private def toXML(hostMeta: HostMeta): Elem =
     <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
       {linksAsXML(hostMeta.links)}
     </XRD>
+
+  private def linksAsXML(links: Seq[Link]): Seq[Elem] =
+    links.map(link => <Link rel="lrdd" type="application/xrd+xml" template={link.template.getOrElse("")}/>)
 }
