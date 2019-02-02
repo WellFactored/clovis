@@ -8,6 +8,7 @@ import clovis.database.{AccountDatabase, FollowCounts}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.scalaxml.xml
+import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpRoutes, Method, Request, Response, _}
 import org.scalatest.{EitherValues, FreeSpecLike, Matchers, OptionValues}
 
@@ -17,6 +18,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
   val knownAccount         = "known"
   val unknownAccount       = "unknown"
   private val hostMetaPath = "/host-meta"
+  private val hostMetaJsonPath = "/host-meta.json"
 
   type F[A] = IO[A]
 
@@ -39,11 +41,15 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
       response.status.code shouldBe 200
     }
 
-    "and have the correct data in the body" in {
+    "and have the correct XML data in the body" in {
       val body = response.as[Elem].unsafeRunSync()
       val lrdd = (body \ "Link").find(_.attribute("rel").map(_.text).contains("lrdd"))
 
       (lrdd.value \@ "template") should include("https://local.domain")
+    }
+
+    "and have a Content-Type of xrd+xml" in {
+      response.headers.get(CaseInsensitiveString("Content-Type")).value.value shouldBe "application/xrd+xml; charset=UTF-8"
     }
   }
 
@@ -60,6 +66,30 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
       val lrdd = body.links.find(_.rel.contains("lrdd"))
 
       lrdd.value.template.value should include("https://local.domain")
+    }
+
+    "and have a Content-Type of application/json" in {
+      response.headers.get(CaseInsensitiveString("Content-Type")).value.value shouldBe "application/json"
+    }
+  }
+
+  "calling host-meta.json path" - {
+    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaJsonPath))
+    val response: Response[F] = routeRequest(request)
+
+    "should respond with an OK" in {
+      response.status.code shouldBe 200
+    }
+
+    "and have the correct data in the body" in {
+      val body = response.as[HostMeta].unsafeRunSync()
+      val lrdd = body.links.find(_.rel.contains("lrdd"))
+
+      lrdd.value.template.value should include("https://local.domain")
+    }
+
+    "and have a Content-Type of application/json" in {
+      response.headers.get(CaseInsensitiveString("Content-Type")).value.value shouldBe "application/json"
     }
   }
 
