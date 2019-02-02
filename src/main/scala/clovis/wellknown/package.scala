@@ -19,6 +19,8 @@ package clovis.wellknown
 
 import java.net.URI
 
+import scala.xml.Elem
+
 case class Link(
   rel:        String,
   `type`:     Option[String],
@@ -29,4 +31,12 @@ case class Link(
 
 case class WebfingerResult(subject: URI, aliases: Option[List[URI]], links: Option[List[Link]], properties: Option[Map[URI, Option[String]]])
 
-case class HostMeta(links: Seq[Link])
+case class HostMeta(links: Seq[Link]) {
+  lazy val toXML: Elem =
+    <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
+      {linksAsXML(links)}
+    </XRD>
+
+  private def linksAsXML(links: Seq[Link]): Seq[Elem] =
+    links.map(link => <Link rel="lrdd" type="application/xrd+xml" template={link.template.getOrElse("")}/>)
+}

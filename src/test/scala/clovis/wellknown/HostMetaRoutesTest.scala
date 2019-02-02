@@ -33,15 +33,15 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
   private val service = new WellKnownServiceImpl[F, F]("local.domain", List("local.domain"), dummyAccountDB)
   private val routes: HttpRoutes[F] = new WellKnownRoutes[F](service).routes
 
-  "calling host-meta with no Accept header" - {
-    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath))
+  "calling host-meta with Accept=application/xrd+xml header" - {
+    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/xrd+xml")))
     val response: Response[F] = routeRequest(request)
 
     checkXMLResponse(response)
   }
 
-  "calling host-meta with Accept=application/xrd+xml header" - {
-    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/xrd+xml")))
+  "calling host-meta with no Accept header" - {
+    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath))
     val response: Response[F] = routeRequest(request)
 
     checkXMLResponse(response)
