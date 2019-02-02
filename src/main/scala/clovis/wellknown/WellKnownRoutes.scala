@@ -45,6 +45,7 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends
   //private val jrdUTF8: `Content-Type` = `Content-Type`(jrd, Charset.`UTF-8`)
 
   private val acceptHeader = CaseInsensitiveString("Accept")
+  case class Error(message: String)
 
   override val mountPoint: String = "/.well-known"
 
@@ -61,8 +62,9 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends
       case req @ GET -> Root / "host-meta" =>
         wellknownService.hostMeta.flatMap { hm =>
           req.headers.get(acceptHeader).map(_.value) match {
-            case Some("application/json") => Ok(hm.asJson.dropNulls)
-            case _                        => Ok(toXML(hm)).map(_.withContentType(xrdUTF8))
+            case Some("application/json")           => Ok(hm.asJson.dropNulls)
+            case Some("application/xrd+xml") | None => Ok(toXML(hm)).map(_.withContentType(xrdUTF8))
+            case Some(accept)                       => NotAcceptable(Error(s"Do not recognize 'Accept' header of '$accept'").asJson)
           }
         }
 
