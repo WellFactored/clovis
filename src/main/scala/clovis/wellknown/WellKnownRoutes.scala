@@ -26,17 +26,15 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.`Content-Type`
+import org.http4s.scalaxml.xmlEncoder
 import org.http4s.util.CaseInsensitiveString
 
 import scala.xml.Elem
 
 /**
-  * Implement endpoints for the "well-known" path (see https://tools.ietf.org/html/rfc5785)
+  * Implement endpoints for the ".well-known" path (see https://tools.ietf.org/html/rfc5785)
   */
-class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F])
-    extends Http4sDsl[F]
-    with MountableService[F]
-    with CirceEntityDecoder {
+class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends Http4sDsl[F] with MountableService[F] with CirceEntityDecoder {
 
   object Resource extends QueryParamDecoderMatcher[String]("resource")
 
@@ -62,14 +60,13 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F])
         wellknownService.hostMeta.flatMap { hm =>
           req.headers.get(acceptHeader).map(_.value) match {
             case Some("application/json") => Ok(hm.asJson.dropNulls)
-            case _                        => Ok(toXML(hm).toString).map(_.withContentType(xrdUTF8))
+            case _                        => Ok(toXML(hm)).map(_.withContentType(xrdUTF8))
           }
         }
     }
 
   private def linksAsXML(links: Seq[Link]): Seq[Elem] =
-    links.map(link =>
-      <Link rel="lrdd" type="application/xrd+xml" template={link.template.getOrElse("")}/>)
+    links.map(link => <Link rel="lrdd" type="application/xrd+xml" template={link.template.getOrElse("")}/>)
 
   private def toXML(hostMeta: HostMeta): Elem =
     <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">

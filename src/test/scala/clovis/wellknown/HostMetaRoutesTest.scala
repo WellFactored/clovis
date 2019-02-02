@@ -39,7 +39,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
       response.status.code shouldBe 200
     }
 
-    "and have the correct data in the body" in {
+    "and have the correct XML data in the body" in {
       val body = response.as[Elem].unsafeRunSync()
       val lrdd = (body \ "Link").find(_.attribute("rel").map(_.text).contains("lrdd"))
 
