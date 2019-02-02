@@ -47,6 +47,13 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
     checkXMLResponse(response)
   }
 
+  "calling host-meta with Accept: */*" - {
+    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "*/*")))
+    val response: Response[F] = routeRequest(request)
+
+    checkXMLResponse(response)
+  }
+
   private def checkXMLResponse(response: Response[F]): Unit = {
     "should respond with an OK" in {
       response.status.code shouldBe 200

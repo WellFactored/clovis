@@ -63,8 +63,8 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends
             case Some(Left(failure)) => BadRequest(failure.asJson)
             case Some(Right(accept)) =>
               accept.values.filter(a => acceptableMediaTypes.exists(_.satisfies(a.mediaRange))).sortBy(_.qValue).lastOption match {
-                case Some(mt) if mt.mediaRange.satisfiedBy(applicationJson) => Ok(hm.asJson.dropNulls)
                 case Some(mt) if mt.mediaRange.satisfiedBy(applicationXrd)  => Ok(hm.toXML).map(_.withContentType(xrdUTF8))
+                case Some(mt) if mt.mediaRange.satisfiedBy(applicationJson) => Ok(hm.asJson.dropNulls)
                 case _                                                      => NotAcceptable(Error(s"Do not recognize 'Accept' header of '$accept'").asJson)
               }
           }
