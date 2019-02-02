@@ -25,7 +25,7 @@ import clovis.database.AccountDatabase
 import clovis.database.rows.AccountRow
 
 trait WellKnownService[F[_]] {
-  def webfinger(acct: String): F[Option[WebfingerResult]]
+  def webfinger(acct: String): F[Option[Webfinger]]
   def hostMeta: F[HostMeta]
 }
 
@@ -38,21 +38,17 @@ class WellKnownServiceImpl[F[_]: Monad, G[_]](
 ) extends WellKnownService[F] {
   private val F = Applicative[F]
 
-  override def hostMeta: F[HostMeta] =
-    F.pure(
-      HostMeta(
-        Seq(
-          Link("lrdd", Some("application/xrd+xml"), None, None, None, Some(s"https://$localDomain/.well-known/webfinger?resource={uri}"))
-        )
-      )
-    )
+  override def hostMeta: F[HostMeta] = {
+    val link = Link("lrdd", Some("application/xrd+xml"), None, None, None, Some(s"https://$localDomain/.well-known/webfinger?resource={uri}"))
+    F.pure(HostMeta(Seq(link)))
+  }
 
-  override def webfinger(acct: String): F[Option[WebfingerResult]] = {
-    val User = "acct:(.*)@(.*)".r
+  override def webfinger(acct: String): F[Option[Webfinger]] = {
+    val UserRegex = "acct:(.*)@(.*)".r
 
     val username: Option[String] = acct match {
-      case User(u, domain) if alternateDomains.contains(domain) => Some(u)
-      case _                                                    => None
+      case UserRegex(u, domain) if alternateDomains.contains(domain) => Some(u)
+      case _                                                         => None
     }
 
     username match {
@@ -64,14 +60,14 @@ class WellKnownServiceImpl[F[_]: Monad, G[_]](
     }
   }
 
-  private def toWebfingerResult(account: AccountRow): WebfingerResult = {
+  private def toWebfingerResult(account: AccountRow): Webfinger = {
     val links = List(
       Link("http://webfinger.net/rel/profile-page", Some("text/html"), Some(shortAccountURL(account)), None, None, None),
       Link("self", Some("application/activity+json"), Some(accountURL(account, None)), None, None, None),
     )
-
-    WebfingerResult(new URI(s"acct:${account.username}@$localDomain"), None, Some(links), None)
+    Webfinger(new URI(s"acct:${account.username}@$localDomain"), None, Some(links), None)
   }
+
   private def shortAccountURL(account: AccountRow): URI =
     new URI(s"https://$localDomain/@${account.username}")
 
@@ -83,5 +79,4 @@ class WellKnownServiceImpl[F[_]: Monad, G[_]](
       case Some(fmt) => new URI(s"$base.$fmt")
     }
   }
-
 }

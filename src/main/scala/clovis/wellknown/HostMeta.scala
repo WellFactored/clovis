@@ -29,7 +29,7 @@ case class Link(
   properties: Option[Map[URI, Option[String]]],
   template:   Option[String])
 
-case class WebfingerResult(subject: URI, aliases: Option[List[URI]], links: Option[List[Link]], properties: Option[Map[URI, Option[String]]])
+
 
 case class HostMeta(links: Seq[Link]) {
   lazy val toXML: Elem =

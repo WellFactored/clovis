@@ -37,8 +37,8 @@ class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues w
   type F[A] = IO[A]
 
   private val service = new WellKnownService[F] {
-    override def webfinger(acct: String): F[Option[WebfingerResult]] =
-      if (acct == knownAccount) Some(WebfingerResult(knownAcctURI, None, None, None)).pure[F]
+    override def webfinger(acct: String): F[Option[Webfinger]] =
+      if (acct == knownAccount) Some(Webfinger(knownAcctURI, None, None, None)).pure[F]
       else None.pure[F]
     override def hostMeta: F[HostMeta] = HostMeta(Seq()).pure[F]
   }
@@ -55,7 +55,7 @@ class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues w
       }
 
       "and have the correct data in the body" in {
-        val result: WebfingerResult = response.as[WebfingerResult].unsafeRunSync()
+        val result: Webfinger = response.as[Webfinger].unsafeRunSync()
         result.subject shouldBe knownAcctURI
       }
     }
