@@ -5,6 +5,7 @@ import clovis.wellknown.{WellKnownRoutes, WellKnownService}
 import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.server.middleware.Logger
 
 object ClovisStream {
   def stream[F[_]: ConcurrentEffect](
@@ -16,7 +17,7 @@ object ClovisStream {
       new WellKnownRoutes[F](webfingerService)
     )
 
-    val router = Router(services.map(s => s.mountPoint -> s.routes): _*).orNotFound
+    val router = Logger(logHeaders = true, logBody = false)(Router(services.map(s => s.mountPoint -> s.routes): _*).orNotFound)
 
     BlazeServerBuilder[F]
       .bindHttp(httpPort, "0.0.0.0")

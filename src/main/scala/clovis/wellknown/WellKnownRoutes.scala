@@ -36,8 +36,8 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends
 
   object Resource extends QueryParamDecoderMatcher[String]("resource")
 
-  private val applicationXrd: MediaType      = new MediaType("application", "xrd+xml")
-  private val xrdUTF8:        `Content-Type` = `Content-Type`(applicationXrd, Charset.`UTF-8`)
+  private val applicationXrd  = new MediaType("application", "xrd+xml")
+  private val xrdUTF8         = `Content-Type`(applicationXrd, Charset.`UTF-8`)
   private val applicationJson = new MediaType("application", "json")
   private val acceptHeader    = CaseInsensitiveString("Accept")
 
