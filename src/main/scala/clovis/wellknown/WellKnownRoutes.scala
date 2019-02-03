@@ -25,7 +25,7 @@ import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.headers.{Accept, `Content-Type`}
+import org.http4s.headers.{Accept, MediaRangeAndQValue, `Content-Type`}
 import org.http4s.scalaxml.xmlEncoder
 import org.http4s.util.CaseInsensitiveString
 
@@ -56,13 +56,14 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends
 
       // https://tools.ietf.org/html/rfc6415
       case req @ GET -> Root / "host-meta" =>
-        val acceptableMediaTypes: List[MediaType] = List(applicationJson, applicationXrd)
         wellknownService.hostMeta.flatMap { hm =>
           req.headers.get(acceptHeader).map(h => Accept.parse(h.value)) match {
             case None                => Ok(hm.toXML).map(_.withContentType(xrdUTF8))
             case Some(Left(failure)) => BadRequest(failure.asJson)
             case Some(Right(accept)) =>
-              accept.values.filter(a => acceptableMediaTypes.exists(_.satisfies(a.mediaRange))).sortBy(_.qValue).lastOption match {
+              // See if any of the media types in the Accept header match what we will accept and find the
+              // one with the highest qValue
+              findAcceptableMediaTypes(accept, List(applicationJson, applicationXrd)).sortBy(_.qValue).lastOption match {
                 case Some(mt) if mt.mediaRange.satisfiedBy(applicationXrd)  => Ok(hm.toXML).map(_.withContentType(xrdUTF8))
                 case Some(mt) if mt.mediaRange.satisfiedBy(applicationJson) => Ok(hm.asJson.dropNulls)
                 case _                                                      => NotAcceptable(Error(s"Do not recognize 'Accept' header of '$accept'").asJson)
@@ -74,4 +75,11 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends
       case GET -> Root / "host-meta.json" =>
         wellknownService.hostMeta.flatMap(hm => Ok(hm.asJson.dropNulls))
     }
+
+  /**
+    * Given an Accept header, which may contain a list of multiple media types, find those types that
+    * satisfy our list of acceptable media types.
+    */
+  private def findAcceptableMediaTypes(accept: Accept, acceptableMediaTypes: List[MediaType]): List[MediaRangeAndQValue] =
+    accept.values.filter(a => acceptableMediaTypes.exists(_.satisfies(a.mediaRange)))
 }

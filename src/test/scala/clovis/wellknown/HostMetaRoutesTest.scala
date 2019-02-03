@@ -20,89 +20,76 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
   private val hostMetaPath     = "/host-meta"
   private val hostMetaJsonPath = "/host-meta.json"
 
-  type F[A] = IO[A]
+  val acceptHeadersThatShouldReturnXML = List(
+    "application/xrd+xml",
+    "application/xrd+xml; charset=utf8",
+    "*/*",
+    "application/*",
+    "application/xrd+xml; q=1.0, application/json; q=0.5",
+    "application/json; q=0.5, application/xrd+xml; q=1.0"
+  )
 
-  private val dummyAccountDB = new AccountDatabase[F] {
-    override def accountById(id:        AccountId): F[Option[AccountRow]]                      = ???
-    override def accountByName(name:    String):    F[Option[AccountRow]]                      = ???
-    override def accountWithFollows(id: AccountId): F[Option[(AccountRow, FollowCounts, Int)]] = ???
-  }
+  val acceptHeadersThatShouldReturnJson = List(
+    "application/json",
+    "application/xrd+xml; q=0.5, application/json; q=1.0",
+    "application/json; q=1.0, application/xrd+xml; q=0.5"
+  )
 
-  implicit val idK: FunctionK[F, F] = FunctionK.id[F]
+  "calling host-meta" - {
+    "with no Accept header" - { shouldReturnXML(callWithoutAccept) }
 
-  private val service = new WellKnownServiceImpl[F, F]("local.domain", List("local.domain"), dummyAccountDB)
-  private val routes: HttpRoutes[F] = new WellKnownRoutes[F](service).routes
-
-  "calling host-meta with Accept=application/xrd+xml header" - {
-    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/xrd+xml")))
-    val response: Response[F] = routeRequest(request)
-
-    checkXMLResponse(response)
-  }
-
-  "calling host-meta with no Accept header" - {
-    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath))
-    val response: Response[F] = routeRequest(request)
-
-    checkXMLResponse(response)
-  }
-
-  "calling host-meta with Accept: */*" - {
-    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "*/*")))
-    val response: Response[F] = routeRequest(request)
-
-    checkXMLResponse(response)
-  }
-
-  private def checkXMLResponse(response: Response[F]): Unit = {
-    "should respond with an OK" in {
-      response.status.code shouldBe 200
+    acceptHeadersThatShouldReturnXML.foreach { a =>
+      s"with Accept=$a" - { shouldReturnXML(callWithAccept(a)) }
     }
 
-    "and have a Content-Type of xrd+xml" in {
-      response.headers.get(CaseInsensitiveString("Content-Type")).value.value shouldBe "application/xrd+xml; charset=UTF-8"
+    def shouldReturnXML(response: Response[F]): Unit = {
+      "should respond with an OK" in { response.status.code shouldBe 200 }
+
+      "and have a Content-Type of xrd+xml" in {
+        response.headers.get(CaseInsensitiveString("Content-Type")).value.value shouldBe "application/xrd+xml; charset=UTF-8"
+      }
+
+      "and have the correct XML data in the body" in {
+        val body = response.as[Elem].unsafeRunSync()
+        val lrdd = (body \ "Link").find(_.attribute("rel").map(_.text).contains("lrdd"))
+
+        (lrdd.value \@ "template") should include("https://local.domain")
+      }
     }
 
-    "and have the correct XML data in the body" in {
-      val body = response.as[Elem].unsafeRunSync()
-      val lrdd = (body \ "Link").find(_.attribute("rel").map(_.text).contains("lrdd"))
+    acceptHeadersThatShouldReturnJson.foreach { a =>
+      s"with Accept=$a" - {
+        val response: Response[F] = callWithAccept(a)
 
-      (lrdd.value \@ "template") should include("https://local.domain")
-    }
-  }
+        "should respond with an OK" in {
+          response.status.code shouldBe 200
+        }
 
-  "calling host-meta with Accept=application/json" - {
-    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/json")))
-    val response: Response[F] = routeRequest(request)
+        "and have the correct data in the body" in {
+          val body = response.as[HostMeta].unsafeRunSync()
+          val lrdd = body.links.find(_.rel.contains("lrdd"))
 
-    "should respond with an OK" in {
-      response.status.code shouldBe 200
-    }
+          lrdd.value.template.value should include("https://local.domain")
+        }
 
-    "and have the correct data in the body" in {
-      val body = response.as[HostMeta].unsafeRunSync()
-      val lrdd = body.links.find(_.rel.contains("lrdd"))
-
-      lrdd.value.template.value should include("https://local.domain")
+        "and have a Content-Type of application/json" in {
+          response.headers.get(CaseInsensitiveString("Content-Type")).value.value shouldBe "application/json"
+        }
+      }
     }
 
-    "and have a Content-Type of application/json" in {
-      response.headers.get(CaseInsensitiveString("Content-Type")).value.value shouldBe "application/json"
-    }
-  }
+    "with Accept=application/csv" - {
+      val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/csv")))
+      val response: Response[F] = routeRequest(request)
 
-  "calling host-meta with Accept=application/csv" - {
-    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/csv")))
-    val response: Response[F] = routeRequest(request)
-
-    "should respond with an Unacceptable" in {
-      response.status.code shouldBe 406
+      "should respond with an Unacceptable" in {
+        response.status.code shouldBe 406
+      }
     }
   }
 
   "calling host-meta.json path" - {
-    val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaJsonPath))
-    val response: Response[F] = routeRequest(request)
+    val response: Response[F] = routeRequest(Request[F](Method.GET, Uri(path = hostMetaJsonPath)))
 
     "should respond with an OK" in {
       response.status.code shouldBe 200
@@ -119,10 +106,28 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
       response.headers.get(CaseInsensitiveString("Content-Type")).value.value shouldBe "application/json"
     }
   }
+
+  type F[A] = IO[A]
+  implicit val idK: FunctionK[F, F] = FunctionK.id[F]
+
+  private lazy val service = new WellKnownServiceImpl[F, F]("local.domain", List("local.domain"), stubAccountDB)
+  private lazy val routes: HttpRoutes[F] = new WellKnownRoutes[F](service).routes
 
   private def routeRequest(request: Request[F]): Response[F] =
     routes(request).value.unsafeRunSync() match {
       case None           => fail(s"No route was found to handle ${request.uri.toString()}")
       case Some(response) => response
     }
+
+  private def callWithAccept(acceptString: String): Response[F] =
+    routeRequest(Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", acceptString))))
+
+  private def callWithoutAccept: Response[F] =
+    routeRequest(Request[F](Method.GET, Uri(path = hostMetaPath)))
+
+  private lazy val stubAccountDB = new AccountDatabase[F] {
+    override def accountById(id:        AccountId): F[Option[AccountRow]]                      = IO.pure(None)
+    override def accountByName(name:    String):    F[Option[AccountRow]]                      = IO.pure(None)
+    override def accountWithFollows(id: AccountId): F[Option[(AccountRow, FollowCounts, Int)]] = IO.pure(None)
+  }
 }
