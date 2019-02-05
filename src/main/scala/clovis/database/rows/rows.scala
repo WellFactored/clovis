@@ -18,5 +18,6 @@
 package clovis.database
 
 package object rows {
+  type UserId = RowId[UserRow]
   type AccountId = RowId[AccountRow]
 }
