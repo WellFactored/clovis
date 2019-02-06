@@ -21,8 +21,8 @@ import java.net.URI
 
 import cats.implicits._
 import cats.{Applicative, Monad, ~>}
-import clovis.database.AccountDatabase
-import clovis.database.rows.AccountRow
+import clovis.database.UserDatabase
+import clovis.database.rows.UserRow
 
 trait WellKnownService[F[_]] {
   def webfinger(acct: String): F[Option[Webfinger]]
@@ -32,7 +32,7 @@ trait WellKnownService[F[_]] {
 class WellKnownServiceImpl[F[_]: Monad, G[_]](
   localDomain:      String,
   alternateDomains: List[String],
-  accountDatabase:  AccountDatabase[G]
+  userDatabase:     UserDatabase[G]
 )(
   implicit tx: G ~> F
 ) extends WellKnownService[F] {
@@ -56,23 +56,23 @@ class WellKnownServiceImpl[F[_]: Monad, G[_]](
         F.pure(None)
 
       case Some(u) =>
-        tx(accountDatabase.accountByName(u)).map(_.map(toWebfingerResult))
+        tx(userDatabase.byName(u)).map(_.map(toWebfingerResult))
     }
   }
 
-  private def toWebfingerResult(account: AccountRow): Webfinger = {
+  private def toWebfingerResult(user: UserRow): Webfinger = {
     val links = List(
-      Link("http://webfinger.net/rel/profile-page", Some("text/html"), Some(shortAccountURL(account)), None, None, None),
-      Link("self", Some("application/activity+json"), Some(accountURL(account, None)), None, None, None),
+      Link("http://webfinger.net/rel/profile-page", Some("text/html"), Some(shortAccountURL(user)), None, None, None),
+      Link("self", Some("application/activity+json"), Some(userURL(user, None)), None, None, None),
     )
-    Webfinger(new URI(s"acct:${account.username}@$localDomain"), None, Some(links), None)
+    Webfinger(new URI(s"acct:${user.username}@$localDomain"), None, Some(links), None)
   }
 
-  private def shortAccountURL(account: AccountRow): URI =
-    new URI(s"https://$localDomain/@${account.username}")
+  private def shortAccountURL(user: UserRow): URI =
+    new URI(s"https://$localDomain/@${user.username}")
 
-  private def accountURL(account: AccountRow, format: Option[String]): URI = {
-    val base = s"https://$localDomain/users/${account.username}"
+  private def userURL(user: UserRow, format: Option[String]): URI = {
+    val base = s"https://$localDomain/users/${user.username}"
 
     format match {
       case None      => new URI(base)

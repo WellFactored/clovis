@@ -3,8 +3,8 @@ package wellknown
 
 import cats.arrow.FunctionK
 import cats.effect.IO
-import clovis.database.rows.{AccountId, AccountRow}
-import clovis.database.{AccountDatabase, FollowCounts}
+import clovis.database.UserDatabase
+import clovis.database.rows.UserRow
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.scalaxml.xml
@@ -110,7 +110,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
   type F[A] = IO[A]
   implicit val idK: FunctionK[F, F] = FunctionK.id[F]
 
-  private lazy val service = new WellKnownServiceImpl[F, F]("local.domain", List("local.domain"), stubAccountDB)
+  private lazy val service = new WellKnownServiceImpl[F, F]("local.domain", List("local.domain"), stubUserDB)
   private lazy val routes: HttpRoutes[F] = new WellKnownRoutes[F](service).routes
 
   private def routeRequest(request: Request[F]): Response[F] =
@@ -125,9 +125,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
   private def callWithoutAccept: Response[F] =
     routeRequest(Request[F](Method.GET, Uri(path = hostMetaPath)))
 
-  private lazy val stubAccountDB = new AccountDatabase[F] {
-    override def accountById(id:        AccountId): F[Option[AccountRow]]                      = IO.pure(None)
-    override def accountByName(name:    String):    F[Option[AccountRow]]                      = IO.pure(None)
-    override def accountWithFollows(id: AccountId): F[Option[(AccountRow, FollowCounts, Int)]] = IO.pure(None)
+  private lazy val stubUserDB = new UserDatabase[F] {
+    override def byName(name: String): F[Option[UserRow]] = IO.pure(None)
   }
 }

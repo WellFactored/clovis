@@ -21,13 +21,12 @@ import cats.effect._
 import cats.implicits._
 import cats.~>
 import ciris.cats.effect._
-import clovis.database.DoobieAccountDB
-import clovis.services.{AccountService, AccountSvcImpl}
+import clovis.database.DoobieUserDB
 import clovis.wellknown.{WellKnownService, WellKnownServiceImpl}
 
 object ClovisServer extends IOApp with TransactionSupport {
   private val configLoader = new ConfigLoader[IO]
-  private val accountDB: DoobieAccountDB = new DoobieAccountDB
+  private val userDB       = new DoobieUserDB
 
   def run(args: List[String]): IO[ExitCode] =
     configLoader.load.flatMap {
@@ -37,11 +36,10 @@ object ClovisServer extends IOApp with TransactionSupport {
 
       case Right(c) =>
         implicit val txK:     ConnectionType ~> IO = tx(c.dbConfig)
-        val accountService:   AccountService[IO]   = new AccountSvcImpl[IO, ConnectionType](accountDB)
-        val webfingerService: WellKnownService[IO] = new WellKnownServiceImpl[IO, ConnectionType](c.localDomain, List(c.localDomain), accountDB)
+        val webfingerService: WellKnownService[IO] = new WellKnownServiceImpl[IO, ConnectionType](c.localDomain, List(c.localDomain), userDB)
 
         ClovisStream
-          .stream[IO](c.port, accountService, webfingerService)
+          .stream[IO](c.port, webfingerService)
           .compile[IO, IO, ExitCode]
           .drain
           .as(ExitCode.Success)

@@ -1,11 +1,8 @@
 package clovis.wellknown
-import java.net.URL
-import java.time.ZonedDateTime
-
 import cats.arrow.FunctionK
 import cats.{Id, ~>}
-import clovis.database.rows.{AccountId, AccountRow, ActorType, RowId}
-import clovis.database.{AccountDatabase, FollowCounts}
+import clovis.database.UserDatabase
+import clovis.database.rows._
 import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
 class WellKnownServiceImplTest extends WordSpecLike with Matchers with OptionValues {
@@ -36,33 +33,21 @@ class WellKnownServiceImplTest extends WordSpecLike with Matchers with OptionVal
     }
   }
 
-  private lazy val fakeAccountDatabase: AccountDatabase[Id] = new AccountDatabase[Id] {
+  private lazy val fakeAccountDatabase: UserDatabase[Id] = new UserDatabase[Id] {
 
-    val accounts: List[AccountRow] = List(
-      dummyAccount("test1", "test user 1")
+    val users: List[UserRow] = List(
+      dummyUser("test1")
     )
 
-    override def accountById(id:        AccountId): Id[Option[AccountRow]]                      = ???
-    override def accountByName(name:    String):    Id[Option[AccountRow]]                      = accounts.find(_.username == name)
-    override def accountWithFollows(id: AccountId): Id[Option[(AccountRow, FollowCounts, Int)]] = ???
+    override def byName(name: String): Id[Option[UserRow]] = users.find(_.username == name)
   }
 
-  private val dummyURL = new URL(s"http://$localDomain")
-  def dummyAccount(username: String, displayName: String): AccountRow =
-    AccountRow(
+  def dummyUser(username: String): UserRow =
+    UserRow(
       username,
-      None,
-      displayName,
-      locked = false,
-      ZonedDateTime.now,
       "",
-      dummyURL,
-      dummyURL,
-      dummyURL,
-      dummyURL,
-      dummyURL,
-      None,
-      ActorType.Person,
-      RowId(0))
+      "",
+      RowId(0)
+    )
 
 }
