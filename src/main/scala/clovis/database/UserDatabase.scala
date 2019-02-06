@@ -24,7 +24,7 @@ object DoobieUserDB extends PropertyInfoGen {
 
 class DoobieUserDB extends UserDatabase[ConnectionIO] with MetaHelpers {
   private val selectUser =
-    fr"""select""" ++ DoobieUserDB.allColumns ++ fr""" from account"""
+    fr"""select""" ++ DoobieUserDB.allColumns ++ fr""" from "user""""
 
   override def byName(name: String): ConnectionIO[Option[UserRow]] =
     (selectUser ++ fr"""where username = $name""")
