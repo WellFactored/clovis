@@ -1,4 +1,4 @@
-package clovis.database.security
+package clovis.security
 import cats.effect.IO
 import org.scalatest.{FreeSpecLike, Matchers}
 

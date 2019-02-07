@@ -1,4 +1,4 @@
-package clovis.database.security
+package clovis.security
 import java.security.interfaces.{RSAPrivateKey, RSAPublicKey}
 import java.security.spec.{PKCS8EncodedKeySpec, X509EncodedKeySpec}
 import java.security.{KeyFactory, KeyPairGenerator}
