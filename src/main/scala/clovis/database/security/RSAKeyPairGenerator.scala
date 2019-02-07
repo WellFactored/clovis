@@ -6,7 +6,7 @@ import java.util.Base64
 
 import cats.effect.Sync
 
-class RSAKeyPair(privateKey: RSAPrivateKey, publicKey: RSAPublicKey) {
+case class RSAKeyPair(privateKey: RSAPrivateKey, publicKey: RSAPublicKey) {
   import RSAKeyPair.base64Encoder
 
   val encodedPrivateKey: String = base64Encoder.encodeToString(privateKey.getEncoded)
