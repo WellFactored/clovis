@@ -21,8 +21,8 @@ import java.net.URL
 import java.sql.Timestamp
 import java.time.{Instant, ZoneId, ZonedDateTime}
 
+import clovis.database.rows.RowId
 import doobie.util.Meta
-import clovis.database.rows.{ActorType, RowId}
 
 /**
   * Define some `Meta` instances for common mappings from SQL types to Scala types.
@@ -35,8 +35,7 @@ trait MetaHelpers {
     Meta[String].imap(s => new URL(s))(_.toString)
 
   implicit val zonedDateTimeMeta: Meta[ZonedDateTime] =
-    Meta[Timestamp].imap(ts =>
-      ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts.getTime), ZoneId.systemDefault))(
+    Meta[Timestamp].imap(ts => ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts.getTime), ZoneId.systemDefault))(
       zdt => new Timestamp(Instant.from(zdt).toEpochMilli)
     )
 }
