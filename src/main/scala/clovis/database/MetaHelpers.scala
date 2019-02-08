@@ -39,7 +39,4 @@ trait MetaHelpers {
       ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts.getTime), ZoneId.systemDefault))(
       zdt => new Timestamp(Instant.from(zdt).toEpochMilli)
     )
-
-  implicit val actorTypeMeta: Meta[ActorType] =
-    Meta[String].imap(ActorType.withName)(_.entryName)
 }
