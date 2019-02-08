@@ -6,7 +6,8 @@ class RSAKeyPairTest extends FreeSpecLike with Matchers {
 
   "round trip" - {
     "when we generate a keypair" - {
-      val kp: RSAKeyPair = RSAKeyPairGenerator.generate[IO].unsafeRunSync()
+      val create: IO[RSAKeyPairGenerator[IO]] = RSAKeyPairGenerator.create[IO]
+      val kp:     RSAKeyPair                  = create.flatMap(_.generate).unsafeRunSync()
 
       "and convert the keys to strings" - {
         val pubString  = kp.encodedPublicKey
