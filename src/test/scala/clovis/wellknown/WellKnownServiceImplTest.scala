@@ -1,14 +1,19 @@
 package clovis.wellknown
 import cats.arrow.FunctionK
+import cats.effect.IO
 import cats.{Id, ~>}
 import clovis.database.UserDatabase
 import clovis.database.rows._
+import clovis.security.{RSAKeyPair, RSAKeyPairGenerator}
 import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
 class WellKnownServiceImplTest extends WordSpecLike with Matchers with OptionValues {
   implicit val idK: Id ~> Id = FunctionK.id[Id]
 
   private val localDomain = "test.domain"
+
+  private val dummyKeyPair: RSAKeyPair =
+    RSAKeyPairGenerator.create[IO].flatMap(_.generate).unsafeRunSync()
 
   val service = new WellKnownServiceImpl[Id, Id](localDomain, List(localDomain, "another.domain"), fakeAccountDatabase)
 
@@ -35,9 +40,7 @@ class WellKnownServiceImplTest extends WordSpecLike with Matchers with OptionVal
 
   private lazy val fakeAccountDatabase: UserDatabase[Id] = new UserDatabase[Id] {
 
-    val users: List[UserRow] = List(
-      dummyUser("test1")
-    )
+    val users: List[UserRow] = List(dummyUser("test1"))
 
     override def byName(name: String): Id[Option[UserRow]] = users.find(_.username == name)
   }
@@ -45,8 +48,8 @@ class WellKnownServiceImplTest extends WordSpecLike with Matchers with OptionVal
   def dummyUser(username: String): UserRow =
     UserRow(
       username,
-      "",
-      "",
+      dummyKeyPair.publicKey,
+      dummyKeyPair.privateKey,
       RowId(0)
     )
 

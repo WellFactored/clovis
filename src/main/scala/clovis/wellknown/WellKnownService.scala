@@ -23,6 +23,7 @@ import cats.implicits._
 import cats.{Applicative, Monad, ~>}
 import clovis.database.UserDatabase
 import clovis.database.rows.UserRow
+import clovis.security.RSAKeys
 
 trait WellKnownService[F[_]] {
   def webfinger(acct: String): F[Option[Webfinger]]
@@ -38,8 +39,10 @@ class WellKnownServiceImpl[F[_]: Monad, G[_]](
 ) extends WellKnownService[F] {
   private val F = Applicative[F]
 
+  private val protocol = if (localDomain == "localhost") "http" else "https"
+
   override def hostMeta: F[HostMeta] = {
-    val link = Link("lrdd", Some("application/xrd+xml"), None, None, None, Some(s"https://$localDomain/.well-known/webfinger?resource={uri}"))
+    val link = Link("lrdd", Some("application/xrd+xml"), None, None, None, Some(s"$protocol://$localDomain/.well-known/webfinger?resource={uri}"))
     F.pure(HostMeta(Seq(link)))
   }
 
@@ -64,15 +67,19 @@ class WellKnownServiceImpl[F[_]: Monad, G[_]](
     val links = List(
       Link("http://webfinger.net/rel/profile-page", Some("text/html"), Some(shortAccountURL(user)), None, None, None),
       Link("self", Some("application/activity+json"), Some(userURL(user, None)), None, None, None),
+      Link("magic-public-key", None, Some(magicKey(user)), None, None, None)
     )
     Webfinger(new URI(s"acct:${user.username}@$localDomain"), None, Some(links), None)
   }
 
+  private def magicKey(user: UserRow): URI =
+    new URI(s"data:application/magic-public-key,${RSAKeys.magicKeyString(user.publicKey)}")
+
   private def shortAccountURL(user: UserRow): URI =
-    new URI(s"https://$localDomain/@${user.username}")
+    new URI(s"$protocol://$localDomain/@${user.username}")
 
   private def userURL(user: UserRow, format: Option[String]): URI = {
-    val base = s"https://$localDomain/users/${user.username}"
+    val base = s"$protocol://$localDomain/users/${user.username}"
 
     format match {
       case None      => new URI(base)

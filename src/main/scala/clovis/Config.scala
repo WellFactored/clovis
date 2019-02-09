@@ -12,7 +12,7 @@ class ConfigLoader[F[_]: Sync: Applicative] {
   private val dbPassword = envF[F, Option[Secret[String]]]("JDBC_DATABASE_PASSWORD").mapValue(_.getOrElse(Secret("")))
   private val dbConfig   = loadConfig(dbURL, dbUser, dbPassword)(DBConfig.apply)
 
-  private val localDomain = envF[F, Option[String]]("LOCAL_DOMAIN").mapValue(_.getOrElse("scala.haus"))
+  private val localDomain = envF[F, Option[String]]("LOCAL_DOMAIN").mapValue(_.getOrElse("localhost"))
 
   private val httpPort = propF[F, Option[Int]]("http.port").mapValue(_.getOrElse(8080))
 

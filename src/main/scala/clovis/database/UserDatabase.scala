@@ -1,5 +1,6 @@
 package clovis.database
 import clovis.database.rows.UserRow
+import clovis.security.RSAKeyMetaHelpers
 import com.wellfactored.propertyinfo.{PropertyInfo, PropertyInfoGen}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
@@ -21,7 +22,7 @@ object DoobieUserDB extends PropertyInfoGen {
   val allColumns: Fragment = Fragment.const0(fieldNames)
 }
 
-class DoobieUserDB extends UserDatabase[ConnectionIO] with MetaHelpers {
+class DoobieUserDB extends UserDatabase[ConnectionIO] with MetaHelpers with RSAKeyMetaHelpers {
   private val selectUser =
     fr"""select""" ++ DoobieUserDB.allColumns ++ fr""" from "user""""
 
