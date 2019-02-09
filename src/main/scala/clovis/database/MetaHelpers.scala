@@ -17,7 +17,6 @@
 
 package clovis.database
 
-import java.net.URL
 import java.sql.Timestamp
 import java.time.{Instant, ZoneId, ZonedDateTime}
 
@@ -31,11 +30,10 @@ trait MetaHelpers {
   implicit def idMeta[T]: Meta[RowId[T]] =
     Meta[Long].imap(RowId[T])(_.id)
 
-  implicit val urlMeta: Meta[URL] =
-    Meta[String].imap(s => new URL(s))(_.toString)
-
   implicit val zonedDateTimeMeta: Meta[ZonedDateTime] =
     Meta[Timestamp].imap(ts => ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts.getTime), ZoneId.systemDefault))(
       zdt => new Timestamp(Instant.from(zdt).toEpochMilli)
     )
 }
+
+object MetaHelpers extends MetaHelpers

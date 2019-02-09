@@ -4,7 +4,6 @@ import com.wellfactored.propertyinfo.{PropertyInfo, PropertyInfoGen}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.fragment.Fragment
-import com.wellfactored.propertyinfo._
 import shapeless.LabelledGeneric
 
 trait UserDatabase[F[_]] {
