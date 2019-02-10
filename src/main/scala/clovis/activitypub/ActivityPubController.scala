@@ -9,20 +9,19 @@ import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
 trait ActivityPubController[F[_]] {
-  def getPerson(name: String): F[Response[F]]
+  def getPerson(name: String, hostDetails: HostDetails): F[Response[F]]
 }
 
-class ActivityPubControllerImpl[F[_]: Sync](service: ActivityPubService[F], localDomain: String) extends ActivityPubController[F] with Http4sDsl[F] {
+class ActivityPubControllerImpl[F[_]: Sync](service: ActivityPubService[F]) extends ActivityPubController[F] with Http4sDsl[F] {
 
-  def getPerson(name: String): F[Response[F]] = service.lookupPerson(name).flatMap {
-    case Some(p) => Ok(actorObjectOf(p))
+  def getPerson(name: String, hostDetails: HostDetails): F[Response[F]] = service.lookupPerson(name).flatMap {
+    case Some(p) => Ok(actorObjectOf(p, hostDetails))
     case None    => NotFound()
   }
 
-  private val protocol: String = if (localDomain == "localhost") "http" else "https"
-  private val urlBase:  String = s"$protocol//$localDomain"
-
-  private def actorObjectOf(person: PersonActor): Json = {
+  private def actorObjectOf(person: PersonActor, hostDetails: HostDetails): Json = {
+    val protocol: String = if (hostDetails.isSecure) "https" else "http"
+    val urlBase:  String = s"$protocol//${hostDetails.host}"
     val idUrl = s"$urlBase/person/${person.name}"
     obj(
       Seq(
