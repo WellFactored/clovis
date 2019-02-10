@@ -2,13 +2,16 @@ import sbt.addCompilerPlugin
 
 enablePlugins(JavaAppPackaging)
 
-val Http4sVersion  = "0.19.0"
-val Specs2Version  = "4.2.0"
-val LogbackVersion = "1.2.3"
-
+val Http4sVersion          = "0.19.0"
+val Specs2Version          = "4.2.0"
+val LogbackVersion         = "1.2.3"
 val enumeratumCirceVersion = "1.5.20"
-lazy val doobieVersion     = "0.6.0"
+val doobieVersion          = "0.6.0"
 val circeVersion           = "0.11.1"
+val log4catsVersion        = "0.3.0-M2"
+val scalacheckVersion      = "1.14.0"
+val cirisVersion           = "0.12.1"
+val macwireVersion         = "2.3.1"
 
 organizationName := "Well-Factored Software Ltd."
 startYear := Some(2018)
@@ -22,23 +25,24 @@ lazy val root = (project in file("."))
     scalaVersion := "2.12.8",
     scalacOptions ++= Seq("-Ypartial-unification"),
     libraryDependencies ++= Seq(
-      "org.http4s"       %% "http4s-blaze-server" % Http4sVersion,
-      "org.http4s"       %% "http4s-blaze-client" % Http4sVersion,
-      "org.http4s"       %% "http4s-circe"        % Http4sVersion,
-      "org.http4s"       %% "http4s-dsl"          % Http4sVersion,
-      "org.http4s"       %% "http4s-scala-xml"    % Http4sVersion,
-      "is.cir"           %% "ciris-cats-effect"   % "0.12.1",
-      "io.circe"         %% "circe-generic"       % circeVersion,
-      "io.circe"         %% "circe-literal"       % circeVersion,
-      "io.circe"         %% "circe-parser"        % circeVersion,
-      "io.estatico"      %% "newtype"             % "0.4.2",
-      "org.scalacheck"   %% "scalacheck"          % "1.14.0" % "test",
-      "ch.qos.logback"   % "logback-classic"      % LogbackVersion,
-      "com.wellfactored" %% "property-info"       % "1.1.3",
-      "com.beachape"     %% "enumeratum-circe"    % enumeratumCirceVersion,
-      "org.tpolecat"     %% "doobie-core"         % doobieVersion,
-      "org.tpolecat"     %% "doobie-postgres"     % doobieVersion,
-      "org.tpolecat"     %% "doobie-scalatest"    % doobieVersion
+      "org.http4s"               %% "http4s-blaze-server" % Http4sVersion,
+      "org.http4s"               %% "http4s-blaze-client" % Http4sVersion,
+      "org.http4s"               %% "http4s-circe"        % Http4sVersion,
+      "org.http4s"               %% "http4s-dsl"          % Http4sVersion,
+      "org.http4s"               %% "http4s-scala-xml"    % Http4sVersion,
+      "is.cir"                   %% "ciris-cats-effect"   % cirisVersion,
+      "io.circe"                 %% "circe-generic"       % circeVersion,
+      "io.circe"                 %% "circe-literal"       % circeVersion,
+      "io.circe"                 %% "circe-parser"        % circeVersion,
+      "io.estatico"              %% "newtype"             % "0.4.2",
+      "org.scalacheck"           %% "scalacheck"          % scalacheckVersion % "test",
+      "io.chrisdavenport"        %% "log4cats-slf4j"      % log4catsVersion,
+      "ch.qos.logback"           % "logback-classic"      % LogbackVersion,
+      "com.wellfactored"         %% "property-info"       % "1.1.3",
+      "com.beachape"             %% "enumeratum-circe"    % enumeratumCirceVersion,
+      "org.tpolecat"             %% "doobie-postgres"     % doobieVersion,
+      "org.tpolecat"             %% "doobie-scalatest"    % doobieVersion,
+      "com.softwaremill.macwire" %% "macros"              % macwireVersion % "provided"
     ),
     addCompilerPlugin("org.spire-math"  %% "kind-projector"     % "0.9.9"),
     addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % "0.2.4"),

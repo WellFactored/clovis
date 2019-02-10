@@ -23,7 +23,7 @@ import org.http4s.HttpRoutes
   * `MountableService` combines a set of routes with a mount point. These can form the parameters to the
   * `BlazeBuilder.mountService`
   */
-trait MountableService[F[_]] {
+trait MountableRoutes[F[_]] {
   def routes: HttpRoutes[F]
   def mountPoint: String
 }

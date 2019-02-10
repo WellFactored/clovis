@@ -15,7 +15,7 @@ class WellKnownServiceImplTest extends WordSpecLike with Matchers with OptionVal
   private val dummyKeyPair: RSAKeyPair =
     RSAKeyPairGenerator.create[IO].flatMap(_.generate).unsafeRunSync()
 
-  val service = new WellKnownServiceImpl[Id, Id](localDomain, List(localDomain, "another.domain"), fakeAccountDatabase)
+  val service = new WellKnownServiceImpl[Id, Id](localDomain, fakeAccountDatabase)
 
   "hostMeta" should {
     "return a link that contains the local domain" in {

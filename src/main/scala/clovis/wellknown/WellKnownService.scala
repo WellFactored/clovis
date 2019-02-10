@@ -31,9 +31,8 @@ trait WellKnownService[F[_]] {
 }
 
 class WellKnownServiceImpl[F[_]: Monad, G[_]](
-  localDomain:      String,
-  alternateDomains: List[String],
-  userDatabase:     UserDatabase[G]
+  localDomain:  String,
+  userDatabase: UserDatabase[G]
 )(
   implicit tx: G ~> F
 ) extends WellKnownService[F] {
@@ -50,8 +49,8 @@ class WellKnownServiceImpl[F[_]: Monad, G[_]](
     val UserRegex = "acct:(.*)@(.*)".r
 
     val username: Option[String] = acct match {
-      case UserRegex(u, domain) if alternateDomains.contains(domain) => Some(u)
-      case _                                                         => None
+      case UserRegex(u, domain) if domain == localDomain => Some(u)
+      case _                                             => None
     }
 
     username match {

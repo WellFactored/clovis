@@ -110,7 +110,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
   type F[A] = IO[A]
   implicit val idK: FunctionK[F, F] = FunctionK.id[F]
 
-  private lazy val service = new WellKnownServiceImpl[F, F]("local.domain", List("local.domain"), stubUserDB)
+  private lazy val service = new WellKnownServiceImpl[F, F]("local.domain", stubUserDB)
   private lazy val routes: HttpRoutes[F] = new WellKnownRoutes[F](service).routes
 
   private def routeRequest(request: Request[F]): Response[F] =

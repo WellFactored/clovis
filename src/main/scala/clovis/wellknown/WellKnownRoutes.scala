@@ -32,7 +32,7 @@ import org.http4s.util.CaseInsensitiveString
 /**
   * Implement endpoints for the ".well-known" path (see https://tools.ietf.org/html/rfc5785)
   */
-class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends Http4sDsl[F] with MountableService[F] with CirceEntityDecoder {
+class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends Http4sDsl[F] with MountableRoutes[F] with CirceEntityDecoder {
 
   object Resource extends QueryParamDecoderMatcher[String]("resource")
 

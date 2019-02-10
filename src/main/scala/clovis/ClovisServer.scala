@@ -19,14 +19,11 @@ package clovis
 
 import cats.effect._
 import cats.implicits._
-import cats.~>
 import ciris.cats.effect._
-import clovis.database.DoobieUserDB
-import clovis.wellknown.{WellKnownService, WellKnownServiceImpl}
+import clovis.wiring.AppWiring
 
 object ClovisServer extends IOApp with TransactionSupport {
   private val configLoader = new ConfigLoader[IO]
-  private val userDB       = new DoobieUserDB
 
   def run(args: List[String]): IO[ExitCode] =
     configLoader.load.flatMap {
@@ -35,11 +32,9 @@ object ClovisServer extends IOApp with TransactionSupport {
         IO.pure(ExitCode.Error)
 
       case Right(c) =>
-        implicit val txK:     ConnectionType ~> IO = tx(c.dbConfig)
-        val webfingerService: WellKnownService[IO] = new WellKnownServiceImpl[IO, ConnectionType](c.localDomain, List(c.localDomain), userDB)
+        val wiring = new AppWiring[IO](c)
 
-        ClovisStream
-          .stream[IO](c.port, webfingerService)
+        new ClovisStream[IO](c.startupPort, wiring.routes).start
           .compile[IO, IO, ExitCode]
           .drain
           .as(ExitCode.Success)
