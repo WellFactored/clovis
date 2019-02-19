@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/WellFactored/clovis/branch/master/graph/badge.svg)](https://codecov.io/gh/WellFactored/clovis)
 [![Known Vulnerabilities](https://snyk.io/test/github/WellFactored/clovis/badge.svg?targetFile=build.sbt)](https://snyk.io/test/github/WellFactored/clovis?targetFile=build.sbt)
 
-This is a scala implementation of Mastodon. I have started this mainly as an exercise to learn about
-`http4s`, `fs2` and related technologies, as well as to better understand `ActivityPub`. 
+Clovis is an implementation of the [ActivityPub](https://www.w3.org/TR/activitypub/) protocol in Scala. It's intended as a way for me to learn about the protocol, and also
+about certain Scala libraries that I want to use, namely [`http4s`](https://http4s.org), [`fs2`](https://fs2.io) and [`doobie`](https://tpolecat.github.io/doobie/).
 
-Don't expect it to be a complete thing any time soon.
+Clovis is very much a side project and a work in progress.
