@@ -25,7 +25,7 @@ import cats.syntax.applicative._
 import io.circe.generic.auto._
 import org.http4s._
 import org.http4s.circe.CirceEntityDecoder._
-import org.http4s.dsl.io._
+import org.http4s.implicits._
 import org.scalatest.{EitherValues, FreeSpecLike, Matchers, OptionValues}
 
 class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues with EitherValues {
