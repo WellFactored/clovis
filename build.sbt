@@ -37,14 +37,14 @@ lazy val root = (project in file("."))
       "io.circe"                 %% "circe-parser"        % circeVersion,
       "io.circe"                 %% "circe-refined"       % circeVersion,
       "io.estatico"              %% "newtype"             % "0.4.2",
-      "org.scalacheck"           %% "scalacheck"          % scalacheckVersion % "test",
+      "org.scalacheck"           %% "scalacheck"          % scalacheckVersion % Test,
       "io.chrisdavenport"        %% "log4cats-slf4j"      % log4catsVersion,
       "ch.qos.logback"           % "logback-classic"      % LogbackVersion,
       "com.wellfactored"         %% "property-info"       % "1.1.3",
       "com.beachape"             %% "enumeratum-circe"    % enumeratumCirceVersion,
       "org.tpolecat"             %% "doobie-postgres"     % doobieVersion,
-      "org.tpolecat"             %% "doobie-scalatest"    % doobieVersion,
-      "com.softwaremill.macwire" %% "macros"              % macwireVersion % "provided"
+      "org.tpolecat"             %% "doobie-scalatest"    % doobieVersion % Test,
+      "com.softwaremill.macwire" %% "macros"              % macwireVersion % Provided
     ),
     addCompilerPlugin("org.spire-math"  %% "kind-projector"     % "0.9.9"),
     addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % "0.2.4"),
