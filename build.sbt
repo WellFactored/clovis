@@ -12,6 +12,7 @@ val log4catsVersion        = "0.3.0"
 val scalacheckVersion      = "1.14.0"
 val cirisVersion           = "0.12.1"
 val macwireVersion         = "2.3.1"
+val refinedVersion         = "0.9.4"
 
 organizationName := "Well-Factored Software Ltd."
 startYear := Some(2018)
@@ -34,6 +35,7 @@ lazy val root = (project in file("."))
       "io.circe"                 %% "circe-generic"       % circeVersion,
       "io.circe"                 %% "circe-literal"       % circeVersion,
       "io.circe"                 %% "circe-parser"        % circeVersion,
+      "io.circe"                 %% "circe-refined"       % circeVersion,
       "io.estatico"              %% "newtype"             % "0.4.2",
       "org.scalacheck"           %% "scalacheck"          % scalacheckVersion % "test",
       "io.chrisdavenport"        %% "log4cats-slf4j"      % log4catsVersion,

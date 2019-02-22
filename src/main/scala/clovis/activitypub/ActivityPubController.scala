@@ -1,12 +1,12 @@
 package clovis.activitypub
-import java.net.URL
-
 import cats.effect.Sync
 import cats.implicits._
 import clovis.activitypub.models.PersonActor
+import eu.timepit.refined._
+import eu.timepit.refined.string.Url
 import io.circe.generic.auto._
+import io.circe.refined._
 import io.circe.syntax._
-import io.circe.{Encoder, Json}
 import org.http4s.Response
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -15,15 +15,44 @@ trait ActivityPubController[F[_]] {
   def getPerson(name: String, hostDetails: HostDetails): F[Response[F]]
 }
 
+sealed abstract class ActorType extends enumeratum.EnumEntry
+object ActorType extends enumeratum.Enum[ActorType] with enumeratum.CirceEnum[ActorType] {
+  //noinspection TypeAnnotation
+  override val values = findValues
+
+  case object Person extends ActorType
+}
+
 case class ActorObject(
-  `@context`:        String,
-  `type`:            String,
-  id:                URL,
-  inbox:             URL,
-  outbox:            URL,
+  `@context`:        String, // TODO: Give this some proper structure
+  `type`:            ActorType,
+  id:                UrlString,
+  inbox:             UrlString,
+  outbox:            UrlString,
   name:              String,
   preferredUsername: String
 )
+
+object ActorObject {
+  def of(person: PersonActor, hostDetails: HostDetails): Either[String, ActorObject] = {
+    val protocol: String = if (hostDetails.isSecure) "https" else "http"
+    val urlBase:  String = s"$protocol://${hostDetails.host}"
+    val idUrlString = s"$urlBase/person/${person.name}"
+
+    (refineV[Url](idUrlString), refineV[Url](s"$idUrlString/inbox"), refineV[Url](s"$idUrlString/outbox")).tupled.map {
+      case (idUrl, inboxUrl, outboxUrl) =>
+        ActorObject(
+          """["https://www.w3.org/ns/activitystreams", {"@language": "en"}]""",
+          ActorType.Person,
+          idUrl,
+          inboxUrl,
+          outboxUrl,
+          person.name,
+          person.name
+        )
+    }
+  }
+}
 
 class ActivityPubControllerImpl[F[_]: Sync](service: ActivityPubService[F])
     extends ActivityPubController[F]
@@ -31,27 +60,7 @@ class ActivityPubControllerImpl[F[_]: Sync](service: ActivityPubService[F])
     with CirceEntityDecoder {
 
   def getPerson(name: String, hostDetails: HostDetails): F[Response[F]] = service.lookupPerson(name).flatMap {
-    case Some(p) => Ok(actorObjectOf(p, hostDetails).asJson)
+    case Some(p) => ActorObject.of(p, hostDetails).fold(InternalServerError(_), a => Ok(a.asJson))
     case None    => NotFound()
   }
-
-  implicit val urlEncoder: Encoder[URL] =
-    (a: URL) => Json.fromString(a.toString)
-
-  private def actorObjectOf(person: PersonActor, hostDetails: HostDetails): ActorObject = {
-    val protocol: String = if (hostDetails.isSecure) "https" else "http"
-    val urlBase:  String = s"$protocol://${hostDetails.host}"
-    val idUrl = s"$urlBase/person/${person.name}"
-
-    ActorObject(
-      """["https://www.w3.org/ns/activitystreams", {"@language": "en"}]""",
-      "Person",
-      new URL(idUrl),
-      new URL(s"$idUrl/inbox"),
-      new URL(s"$idUrl/outbox"),
-      person.name,
-      person.name
-    )
-  }
-
 }
