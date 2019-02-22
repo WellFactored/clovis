@@ -12,8 +12,9 @@ class ActorObjectSpec extends FreeSpecLike with Matchers with EitherValues {
 
       "should successfully build an ActorObject" in { actorObjectOrError shouldBe a[Right[_, ActorObject]] }
       val actorObject = actorObjectOrError.right.value
-      "with the right type" in { actorObject.`type` shouldBe ActorType.Person }
-      "and the right name" in { actorObject.name    shouldBe person.name }
+      // At the moment these are the only two properties we need to check.
+      "with type of Person" in { actorObject.`type`                                                shouldBe ActorType.Person }
+      "and a preferredUsername taken from PersonActor.username" in { actorObject.preferredUsername shouldBe person.username }
     }
   }
 }

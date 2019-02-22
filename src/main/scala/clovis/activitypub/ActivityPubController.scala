@@ -35,20 +35,22 @@ case class ActorObject(
 
 object ActorObject {
   def of(person: PersonActor, hostDetails: HostDetails): Either[String, ActorObject] = {
+    // TODO: Improve url construction. In particular, values being embedded in the strings aren't
+    // currently being url-encoded.
     val protocol: String = if (hostDetails.isSecure) "https" else "http"
     val urlBase:  String = s"$protocol://${hostDetails.host}"
-    val idUrlString = s"$urlBase/person/${person.name}"
+    val idUrlString = s"$urlBase/person/${person.username}"
 
     (refineV[Url](idUrlString), refineV[Url](s"$idUrlString/inbox"), refineV[Url](s"$idUrlString/outbox")).tupled.map {
       case (idUrl, inboxUrl, outboxUrl) =>
         ActorObject(
-          """["https://www.w3.org/ns/activitystreams", {"@language": "en"}]""",
+          "https://www.w3.org/ns/activitystreams",
           ActorType.Person,
           idUrl,
           inboxUrl,
           outboxUrl,
-          person.name,
-          person.name
+          person.username,
+          person.username
         )
     }
   }

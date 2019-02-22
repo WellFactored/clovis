@@ -2,6 +2,6 @@ package clovis.activitypub
 
 object models {
 
-  case class PersonActor(name: String)
+  case class PersonActor(username: String)
 
 }
