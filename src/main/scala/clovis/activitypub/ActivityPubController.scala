@@ -1,6 +1,6 @@
 package clovis.activitypub
 
-import cats.effect.Sync
+import cats.Monad
 import cats.implicits._
 import io.circe.generic.auto._
 import io.circe.refined._
@@ -13,7 +13,7 @@ trait ActivityPubController[F[_]] {
   def getPerson(name: String, hostDetails: HostDetails): F[Response[F]]
 }
 
-class ActivityPubControllerImpl[F[_]: Sync](service: ActivityPubService[F])
+class ActivityPubControllerImpl[F[_]: Monad](service: ActivityPubService[F])
     extends ActivityPubController[F]
     with Http4sDsl[F]
     with CirceEntityDecoder {
