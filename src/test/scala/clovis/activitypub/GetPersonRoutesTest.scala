@@ -16,37 +16,59 @@
  */
 
 package clovis.activitypub
+
 import cats.effect.IO
+import cats.implicits._
 import clovis.activitypub.models.PersonActor
 import io.circe.generic.auto._
 import io.circe.refined._
-import org.http4s.Status
 import org.http4s.circe._
+import org.http4s.{HttpRoutes, Method, Request, Response, Status, Uri}
 import org.scalatest.{EitherValues, FreeSpecLike, Matchers}
 
-class GetPersonTest extends FreeSpecLike with Matchers with CirceEntityDecoder with EitherValues {
-  val localhost = HostDetails("localhost", isSecure = false)
-  def dummyService(response: Option[PersonActor]): ActivityPubService[IO] = new ActivityPubService[IO] {
-    override def lookupPerson(username: String): IO[Option[models.PersonActor]] = IO.pure(response)
-  }
+class GetPersonRoutesTest extends FreeSpecLike with Matchers with CirceEntityDecoder with EitherValues {
 
-  def controller(response: Option[PersonActor]): ActivityPubControllerImpl[IO] = new ActivityPubControllerImpl[IO](dummyService(response))
+  type F[A] = IO[A]
 
-  "getPerson should" - {
+  val testUsername    = "username"
+  val testPersonActor = PersonActor(testUsername)
+
+  val dummyService: ActivityPubService[F] =
+    (username: String) => if (username == testUsername) Some(testPersonActor).pure[F] else None.pure[F]
+
+  def controller(response: Option[PersonActor]): ActivityPubController[F] = new ActivityPubControllerImpl[F](dummyService)
+
+  val routes: HttpRoutes[F] = new ActivityPubRoutes[F](controller(None), "local.domain").routes
+
+  "GET /person should" - {
     "return a 404 Not Found if the name does not match a known user" in {
-      controller(None).getPerson("doesn't matter", localhost).unsafeRunSync().status shouldBe Status.NotFound
+      val request:  Request[F]  = Request[F](Method.GET, buildUri("unknown"))
+      val response: Response[F] = routeRequest(request)
+      response.status shouldBe Status.NotFound
     }
+
     "if the name does match" - {
-      val username = "username"
-      val response = controller(Some(PersonActor(username))).getPerson(username, localhost).unsafeRunSync()
+      val request: Request[F] = Request[F](Method.GET, buildUri(testUsername))
+      val response = routeRequest(request)
+
       "it should return a 200 Ok" in { response.status shouldBe Status.Ok }
       val responseBody = response.as[ActorObject].attempt.unsafeRunSync()
       "and the response should contain a valid ActorObject" in { responseBody shouldBe a[Right[_, ActorObject]] }
       "and the ActorObject should" - {
         val actorObject = responseBody.right.value
         "have a type of Person" in { actorObject.`type`                                             shouldBe ActorType.Person }
-        "and its preferredUsername set to the supplied username" in { actorObject.preferredUsername shouldBe username }
+        "and its preferredUsername set to the supplied username" in { actorObject.preferredUsername shouldBe testUsername }
       }
     }
   }
+
+  private def buildUri(name: String): Uri =
+    Uri(path = s"/person/$name")
+
+  private def routeRequest(request: Request[F]): Response[F] =
+    routes(request).value.unsafeRunSync() match {
+      case None           => fail(s"No route was found to handle ${request.uri.toString()}")
+      case Some(response) => response
+    }
+
 }
