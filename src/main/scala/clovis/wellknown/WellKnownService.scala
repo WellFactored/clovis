@@ -23,7 +23,7 @@ import cats.implicits._
 import cats.{Applicative, Monad, ~>}
 import clovis.database.UserDatabase
 import clovis.database.rows.UserRow
-import clovis.security.RSAKeys
+import clovis.security.RSAKeyCodec
 
 trait WellKnownService[F[_]] {
   def webfinger(acct: String): F[Option[Webfinger]]
@@ -72,7 +72,7 @@ class WellKnownServiceImpl[F[_]: Monad, G[_]](
   }
 
   private def magicKey(user: UserRow): URI =
-    new URI(s"data:application/magic-public-key,${RSAKeys.magicKeyString(user.publicKey)}")
+    new URI(s"data:application/magic-public-key,${ RSAKeyCodec.magicKeyString(user.publicKey)}")
 
   private def shortAccountURL(user: UserRow): URI =
     new URI(s"$protocol://$localDomain/@${user.username}")
