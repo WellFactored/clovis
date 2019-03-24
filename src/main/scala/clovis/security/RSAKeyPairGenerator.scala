@@ -23,14 +23,7 @@ import cats.effect.Sync
 
 class RSAKeyPairGenerator[F[_]: Sync](kpg: KeyPairGenerator) {
   def generate: F[RSAKeyPair] = Sync[F].delay {
-    val kp = kpg.generateKeyPair()
-    @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
-    val rsaPublic: RSAPublicKey = kp.getPublic.asInstanceOf[RSAPublicKey]
-
-    @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
-    val rsaPrivate: RSAPrivateKey = kp.getPrivate.asInstanceOf[RSAPrivateKey]
-
-    new RSAKeyPair(rsaPrivate, rsaPublic)
+    RSAKeyPairGenerator.generateRSAKeyPair(kpg)
   }
 }
 
@@ -39,5 +32,22 @@ object RSAKeyPairGenerator {
     val kpg: KeyPairGenerator = KeyPairGenerator.getInstance("RSA")
     kpg.initialize(2048)
     new RSAKeyPairGenerator(kpg)
+  }
+
+  /**
+    * Generate a key pair without managing the side effects. Useful for testing.
+    */
+  def unsafeGenerateRSAKeyPair: RSAKeyPair =
+    generateRSAKeyPair(KeyPairGenerator.getInstance("RSA"))
+
+  private def generateRSAKeyPair(kpg: KeyPairGenerator): RSAKeyPair = {
+    val kp = kpg.generateKeyPair()
+    @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
+    val rsaPublic: RSAPublicKey = kp.getPublic.asInstanceOf[RSAPublicKey]
+
+    @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
+    val rsaPrivate: RSAPrivateKey = kp.getPrivate.asInstanceOf[RSAPrivateKey]
+
+    new RSAKeyPair(rsaPrivate, rsaPublic)
   }
 }
