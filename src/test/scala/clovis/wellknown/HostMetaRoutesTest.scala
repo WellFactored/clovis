@@ -86,6 +86,15 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
         response.status.code shouldBe 406
       }
     }
+
+    "with a bad Accept header" - {
+      val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "unparseable accept header")))
+      val response: Response[F] = routeRequest(request)
+
+      "should respond with an Bad Request" in {
+        response.status.code shouldBe 400
+      }
+    }
   }
 
   "calling host-meta.json path" - {
