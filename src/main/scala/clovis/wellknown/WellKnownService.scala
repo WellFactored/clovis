@@ -65,24 +65,18 @@ class WellKnownServiceImpl[F[_]: Monad, G[_]](
   private def toWebfingerResult(user: UserRow): Webfinger = {
     val links = List(
       Link("http://webfinger.net/rel/profile-page", Some("text/html"), Some(shortAccountURL(user)), None, None, None),
-      Link("self", Some("application/activity+json"), Some(userURL(user, None)), None, None, None),
+      Link("self", Some("application/activity+json"), Some(userURL(user)), None, None, None),
       Link("magic-public-key", None, Some(magicKey(user)), None, None, None)
     )
     Webfinger(new URI(s"acct:${user.username}@$localDomain"), None, Some(links), None)
   }
 
   private def magicKey(user: UserRow): URI =
-    new URI(s"data:application/magic-public-key,${ RSAKeyCodec.magicKeyString(user.publicKey)}")
+    new URI(s"data:application/magic-public-key,${RSAKeyCodec.magicKeyString(user.publicKey)}")
 
   private def shortAccountURL(user: UserRow): URI =
     new URI(s"$protocol://$localDomain/@${user.username}")
 
-  private def userURL(user: UserRow, format: Option[String]): URI = {
-    val base = s"$protocol://$localDomain/users/${user.username}"
-
-    format match {
-      case None      => new URI(base)
-      case Some(fmt) => new URI(s"$base.$fmt")
-    }
-  }
+  private def userURL(user: UserRow): URI =
+    new URI(s"$protocol://$localDomain/users/${user.username}")
 }
