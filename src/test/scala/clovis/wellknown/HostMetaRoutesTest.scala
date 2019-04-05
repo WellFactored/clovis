@@ -96,7 +96,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
     }
 
     "with Accept=application/csv" - {
-      val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "application/csv")))
+      val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers.of(Header("Accept", "application/csv")))
       val response: Response[F] = routeRequest(request)
 
       "should respond with an Unacceptable" in {
@@ -105,7 +105,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
     }
 
     "with a bad Accept header" - {
-      val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", "unparseable accept header")))
+      val request:  Request[F]  = Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers.of(Header("Accept", "unparseable accept header")))
       val response: Response[F] = routeRequest(request)
 
       "should respond with an Bad Request" in {
@@ -146,7 +146,7 @@ class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues wi
     }
 
   private def callWithAccept(acceptString: String): Response[F] =
-    routeRequest(Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers(Header("Accept", acceptString))))
+    routeRequest(Request[F](Method.GET, Uri(path = hostMetaPath), headers = Headers.of(Header("Accept", acceptString))))
 
   private def callWithoutAccept: Response[F] =
     routeRequest(Request[F](Method.GET, Uri(path = hostMetaPath)))
