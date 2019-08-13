@@ -11,5 +11,6 @@ about certain Scala libraries that I want to use, namely [`http4s`](https://http
 
 Clovis is very much a side project and a work in progress.
 
+
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FWellFactored%2Fclovis.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FWellFactored%2Fclovis?ref=badge_large)
