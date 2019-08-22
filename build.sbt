@@ -46,7 +46,7 @@ lazy val root = (project in file("."))
       "org.tpolecat"             %% "doobie-scalatest"    % doobieVersion % Test,
       "com.softwaremill.macwire" %% "macros"              % macwireVersion % Provided
     ),
-    addCompilerPlugin("org.typelevel"  %% "kind-projector"     % "0.10.0"),
+    addCompilerPlugin("org.typelevel"  %% "kind-projector"     % "0.10.3"),
     addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % "0.3.1"),
     addCompilerPlugin("org.scalamacros" % "paradise"            % "2.1.1" cross CrossVersion.full)
   )
