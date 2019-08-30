@@ -40,7 +40,7 @@ lazy val root = (project in file("."))
       "org.scalacheck"           %% "scalacheck"          % scalacheckVersion % Test,
       "io.chrisdavenport"        %% "log4cats-slf4j"      % log4catsVersion,
       "ch.qos.logback"           % "logback-classic"      % LogbackVersion,
-      "com.wellfactored"         %% "property-info"       % "1.1.3",
+      "com.wellfactored"         %% "property-info"       % "1.1.4",
       "com.beachape"             %% "enumeratum-circe"    % enumeratumCirceVersion,
       "org.tpolecat"             %% "doobie-postgres"     % doobieVersion,
       "org.tpolecat"             %% "doobie-scalatest"    % doobieVersion % Test,
