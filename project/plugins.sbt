@@ -11,7 +11,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.4.1")
 
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.2")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.0.4")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.0.5")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.0")
 
