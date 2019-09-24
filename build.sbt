@@ -5,7 +5,7 @@ enablePlugins(JavaAppPackaging)
 val Http4sVersion          = "0.20.11"
 val Specs2Version          = "4.2.0"
 val LogbackVersion         = "1.2.3"
-val enumeratumCirceVersion = "1.5.21"
+val enumeratumCirceVersion = "1.5.22"
 val doobieVersion          = "0.8.2"
 val log4catsVersion        = "1.0.0"
 val circeVersion           = "0.12.1"
