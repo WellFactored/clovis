@@ -9,7 +9,7 @@ addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.4.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.6.1")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.3")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.4")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.1")
 
