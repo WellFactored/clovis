@@ -5,13 +5,13 @@ addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")
 
-addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.3.1")
+addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.4.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.5.2")
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.6.1")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.3")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.4")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.0")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.1")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
 
