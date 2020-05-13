@@ -18,7 +18,6 @@
 package clovis
 
 import cats.effect._
-import cats.implicits._
 import ciris.cats.effect._
 import clovis.wiring.AppWiring
 
