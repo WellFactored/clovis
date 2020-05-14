@@ -23,11 +23,13 @@ import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.middleware.Logger
 
-class ClovisStream[F[_]: ConcurrentEffect: Timer](startupPort: Port, routes: List[MountableRoutes[F]]) {
+import scala.concurrent.ExecutionContext
+
+class ClovisStream[F[_]: ConcurrentEffect: Timer](startupPort: Port, routes: List[MountableRoutes[F]])(implicit ec: ExecutionContext) {
   def start: fs2.Stream[F, ExitCode] = {
     val router = Logger(logHeaders = true, logBody = false, FunctionK.id[F])(Router(routes.map(s => s.mountPoint -> s.routes): _*).orNotFound)
 
-    BlazeServerBuilder[F]
+    BlazeServerBuilder[F](ec)
       .bindHttp(startupPort.value, "0.0.0.0")
       .withHttpApp(router)
       .serve
