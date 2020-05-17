@@ -2,16 +2,16 @@ import sbt.addCompilerPlugin
 
 enablePlugins(JavaAppPackaging)
 
-val Http4sVersion          = "0.21.3"
+val Http4sVersion          = "0.21.4"
 val Specs2Version          = "4.2.0"
 val LogbackVersion         = "1.2.3"
-val enumeratumCirceVersion = "1.6.0"
-val doobieVersion          = "0.8.8"
+val enumeratumCirceVersion = "1.6.1"
+val doobieVersion          = "0.8.7"
 val log4catsVersion        = "1.1.1"
 val circeVersion           = "0.13.0"
 val scalacheckVersion      = "1.14.3"
 val cirisVersion           = "0.12.1"
-val macwireVersion         = "2.3.3"
+val macwireVersion         = "2.3.4"
 val refinedVersion         = "0.9.4"
 
 organizationName := "Well-Factored Software Ltd."
@@ -36,7 +36,7 @@ lazy val root = (project in file("."))
       "io.circe"                 %% "circe-literal"       % circeVersion,
       "io.circe"                 %% "circe-parser"        % circeVersion,
       "io.circe"                 %% "circe-refined"       % circeVersion,
-      "io.estatico"              %% "newtype"             % "0.4.3",
+      "io.estatico"              %% "newtype"             % "0.4.4",
       "org.scalacheck"           %% "scalacheck"          % scalacheckVersion % Test,
       "io.chrisdavenport"        %% "log4cats-slf4j"      % log4catsVersion,
       "ch.qos.logback"           % "logback-classic"      % LogbackVersion,

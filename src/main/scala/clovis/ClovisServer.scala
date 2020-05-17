@@ -17,9 +17,13 @@
 
 package clovis
 
+import java.util.concurrent.Executors
+
 import cats.effect._
 import ciris.cats.effect._
 import clovis.wiring.AppWiring
+
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
 object ClovisServer extends IOApp with TransactionSupport {
   private val configLoader = new ConfigLoader[IO]
@@ -33,6 +37,7 @@ object ClovisServer extends IOApp with TransactionSupport {
       case Right(c) =>
         val wiring = new AppWiring[IO](c)
 
+        implicit val ec: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)
         new ClovisStream[IO](c.startupPort, wiring.routes).start
           .compile[IO, IO, ExitCode]
           .drain
