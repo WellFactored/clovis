@@ -11,7 +11,7 @@ val log4catsVersion        = "1.1.1"
 val circeVersion           = "0.13.0"
 val scalacheckVersion      = "1.14.3"
 val cirisVersion           = "0.12.1"
-val macwireVersion         = "2.3.5"
+val macwireVersion         = "2.3.6"
 val refinedVersion         = "0.9.4"
 
 organizationName := "Well-Factored Software Ltd."
