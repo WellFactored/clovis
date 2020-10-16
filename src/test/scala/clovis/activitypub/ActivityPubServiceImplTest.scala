@@ -22,9 +22,11 @@ import clovis.activitypub.models.PersonActor
 import clovis.database.UserDatabase
 import clovis.database.rows.{RowId, UserRow}
 import clovis.security.{RSAKeyPair, RSAKeyPairGenerator}
-import org.scalatest.{FreeSpecLike, Matchers, OptionValues}
+import org.scalatest.OptionValues
+import org.scalatest.freespec.AnyFreeSpecLike
+import org.scalatest.matchers.should.Matchers
 
-class ActivityPubServiceImplTest extends FreeSpecLike with Matchers with OptionValues {
+class ActivityPubServiceImplTest extends AnyFreeSpecLike with Matchers with OptionValues {
   private implicit val idK: Id ~> Id   = FunctionK.id[Id]
   val keyPair:              RSAKeyPair = RSAKeyPairGenerator.unsafeGenerateRSAKeyPair
   private val testUser = UserRow("username", keyPair.publicKey, keyPair.privateKey, RowId(-1))

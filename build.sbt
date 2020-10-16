@@ -6,12 +6,13 @@ val Http4sVersion          = "0.21.8"
 val Specs2Version          = "4.2.0"
 val LogbackVersion         = "1.2.3"
 val enumeratumCirceVersion = "1.6.1"
-val doobieVersion          = "0.8.7"
+val doobieVersion          = "0.8.8"
 val log4catsVersion        = "1.1.1"
 val circeVersion           = "0.13.0"
 val scalacheckVersion      = "1.14.3"
-val cirisVersion           = "0.12.1"
+val cirisVersion           = "1.2.1"
 val macwireVersion         = "2.3.7"
+val scalatestVersion       = "3.2.2"
 val refinedVersion         = "0.9.4"
 
 organizationName := "Well-Factored Software Ltd."
@@ -23,15 +24,14 @@ lazy val root = (project in file("."))
     organization := "com.wellfactored",
     name := "clovis",
     version := "0.0.1-SNAPSHOT",
-    scalaVersion := "2.12.8",
-    scalacOptions ++= Seq("-Ypartial-unification"),
+    scalaVersion := "2.13.3",
     libraryDependencies ++= Seq(
       "org.http4s"               %% "http4s-blaze-server" % Http4sVersion,
       "org.http4s"               %% "http4s-blaze-client" % Http4sVersion,
       "org.http4s"               %% "http4s-circe"        % Http4sVersion,
       "org.http4s"               %% "http4s-dsl"          % Http4sVersion,
       "org.http4s"               %% "http4s-scala-xml"    % Http4sVersion,
-      "is.cir"                   %% "ciris-cats-effect"   % cirisVersion,
+      "is.cir"                   %% "ciris"               % cirisVersion,
       "io.circe"                 %% "circe-generic"       % circeVersion,
       "io.circe"                 %% "circe-literal"       % circeVersion,
       "io.circe"                 %% "circe-parser"        % circeVersion,
@@ -43,12 +43,12 @@ lazy val root = (project in file("."))
       "com.wellfactored"         %% "property-info"       % "1.1.4",
       "com.beachape"             %% "enumeratum-circe"    % enumeratumCirceVersion,
       "org.tpolecat"             %% "doobie-postgres"     % doobieVersion,
+      "org.scalatest"            %% "scalatest"           % scalatestVersion % "test",
       "org.tpolecat"             %% "doobie-scalatest"    % doobieVersion % Test,
       "com.softwaremill.macwire" %% "macros"              % macwireVersion % Provided
     ),
-    addCompilerPlugin("org.typelevel"  %% "kind-projector"     % "0.10.3"),
-    addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % "0.3.1"),
-    addCompilerPlugin("org.scalamacros" % "paradise"            % "2.1.1" cross CrossVersion.full)
+    addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
+    addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1")
   )
 
 wartremoverErrors ++= Warts.unsafe
@@ -61,7 +61,5 @@ scalacOptions ++= Seq(
   "-language:higherKinds",
   "-language:postfixOps",
   "-feature",
-  "-Ypartial-unification",
-  "-Xfatal-warnings",
-  "-Xlint"
+  "-Xfatal-warnings"
 )

@@ -31,7 +31,7 @@ package object clovis {
   implicit val uriDecoder: Decoder[URI] = Decoder.instance { uri =>
     uri.value.asString match {
       case Some(s) => Try(new URI(s)).toEither.leftMap(t => DecodingFailure(t.getMessage, List()))
-      case None    => DecodingFailure(s"${uri.value} is not a string", List()).asLeft
+      case None    => DecodingFailure(s"${uri.value.toString} is not a string", List()).asLeft
     }
   }
 

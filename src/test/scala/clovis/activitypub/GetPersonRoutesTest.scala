@@ -22,19 +22,21 @@ import cats.implicits._
 import clovis.activitypub.models.PersonActor
 import io.circe.generic.auto._
 import io.circe.refined._
+import org.http4s._
 import org.http4s.circe._
-import org.http4s.{HttpRoutes, Method, Request, Response, Status, Uri}
-import org.scalatest.{EitherValues, FreeSpecLike, Matchers}
+import org.scalatest.OptionValues
+import org.scalatest.freespec.AnyFreeSpecLike
+import org.scalatest.matchers.should.Matchers
 
-class GetPersonRoutesTest extends FreeSpecLike with Matchers with CirceEntityDecoder with EitherValues {
+class GetPersonRoutesTest extends AnyFreeSpecLike with Matchers with CirceEntityDecoder with OptionValues {
 
   type F[A] = IO[A]
 
-  val testUsername    = "username"
-  val testPersonActor = PersonActor(testUsername)
+  val testUsername = "username"
+  val testPersonActor: PersonActor = PersonActor(testUsername)
 
   val dummyService: ActivityPubService[F] =
-    (username: String) => if (username == testUsername) Some(testPersonActor).pure[F] else None.pure[F]
+    (username: String) => if (username == testUsername) Option(testPersonActor).pure[F] else Option.empty[PersonActor].pure[F]
 
   def controller(response: Option[PersonActor]): ActivityPubController[F] = new ActivityPubControllerImpl[F](dummyService)
 
@@ -55,7 +57,7 @@ class GetPersonRoutesTest extends FreeSpecLike with Matchers with CirceEntityDec
       val responseBody = response.as[ActorObject].attempt.unsafeRunSync()
       "and the response should contain a valid ActorObject" in { responseBody shouldBe a[Right[_, ActorObject]] }
       "and the ActorObject should" - {
-        val actorObject = responseBody.right.value
+        val actorObject = responseBody.toOption.value
         "have a type of Person" in { actorObject.`type`                                             shouldBe ActorType.Person }
         "and its preferredUsername set to the supplied username" in { actorObject.preferredUsername shouldBe testUsername }
       }

@@ -22,7 +22,6 @@ import com.wellfactored.propertyinfo.{PropertyInfo, PropertyInfoGen}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.fragment.Fragment
-import shapeless.LabelledGeneric
 
 trait UserDatabase[F[_]] {
   def byName(name: String): F[Option[UserRow]]
@@ -31,8 +30,7 @@ trait UserDatabase[F[_]] {
 object DoobieUserDB extends PropertyInfoGen {
   def decamelise(s: String): String = s.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase
 
-  implicit val lg: LabelledGeneric[UserRow] = LabelledGeneric[UserRow]
-  val pi:          PropertyInfo[UserRow]    = implicitly[PropertyInfo[UserRow]]
+  val pi: PropertyInfo[UserRow] = implicitly[PropertyInfo[UserRow]]
 
   val fieldNames: String = pi.namesAndTypes.map(_.name).map(decamelise).mkString(", ")
 

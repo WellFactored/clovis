@@ -21,7 +21,8 @@ import java.sql.Timestamp
 import java.time.{Instant, ZoneId, ZonedDateTime}
 
 import clovis.database.rows.RowId
-import doobie.util.Meta
+import doobie.Meta
+import doobie.implicits.javasql.TimestampMeta
 
 /**
   * Define some `Meta` instances for common mappings from SQL types to Scala types.

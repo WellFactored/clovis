@@ -18,7 +18,7 @@
 package clovis.security
 import java.security.interfaces.{RSAPrivateKey, RSAPublicKey}
 
-import doobie.util.Meta
+import doobie.Meta
 
 trait RSAKeyMetaHelpers {
   import RSAKeyCodec._

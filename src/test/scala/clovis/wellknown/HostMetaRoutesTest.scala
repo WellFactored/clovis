@@ -27,11 +27,13 @@ import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.scalaxml.xml
 import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpRoutes, Method, Request, Response, _}
-import org.scalatest.{EitherValues, FreeSpecLike, Matchers, OptionValues}
+import org.scalatest._
+import org.scalatest.freespec.AnyFreeSpecLike
+import org.scalatest.matchers.should.Matchers
 
 import scala.xml.Elem
 
-class HostMetaRoutesTest extends FreeSpecLike with Matchers with OptionValues with EitherValues {
+class HostMetaRoutesTest extends AnyFreeSpecLike with Matchers with OptionValues with EitherValues {
   val knownAccount             = "known"
   val unknownAccount           = "unknown"
   private val hostMetaPath     = "/host-meta"

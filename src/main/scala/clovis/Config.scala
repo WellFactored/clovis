@@ -16,9 +16,9 @@
  */
 
 package clovis
-import cats.data.EitherT
+import cats.effect.{Async, ContextShift}
+import cats.implicits._
 import ciris._
-import ciris.api.{Applicative, Sync}
 
 case class Port(value: Int)
 
@@ -26,20 +26,17 @@ case class DBConfig(url: String, username: String, password: Secret[String])
 
 case class Config(localDomain: String, startupPort: Port, dbConfig: DBConfig)
 
-class ConfigLoader[F[_]: Sync: Applicative] {
-  implicit def portDecoder[A](
-    implicit decoder: ConfigDecoder[A, Int]
-  ): ConfigDecoder[A, Port] =
-    decoder.mapOption("Port")(i => Some(Port(i)))
+class ConfigLoader[F[_]: ContextShift: Async] {
+  implicit def portDecoder: ConfigDecoder[String, Port] = ConfigDecoder[String, Int].map(Port)
 
-  private val dbURL      = envF[F, Option[String]]("JDBC_DATABASE_URL").mapValue(_.getOrElse("jdbc:postgresql:clovis"))
-  private val dbUser     = envF[F, Option[String]]("JDBC_DATABASE_USERNAME").mapValue(_.getOrElse("clovis"))
-  private val dbPassword = envF[F, Option[Secret[String]]]("JDBC_DATABASE_PASSWORD").mapValue(_.getOrElse(Secret("")))
-  private val dbConfig   = loadConfig(dbURL, dbUser, dbPassword)(DBConfig.apply)
+  private val dbURL      = env("JDBC_DATABASE_URL").as[String].default("jdbc:postgresql:clovis")
+  private val dbUser     = env("JDBC_DATABASE_USERNAME").as[String].default("clovis")
+  private val dbPassword = env("JDBC_DATABASE_PASSWORD").as[String].secret.default(Secret(""))
+  private val dbConfig   = (dbURL, dbUser, dbPassword).parMapN(DBConfig)
 
-  private val localDomain = envF[F, Option[String]]("LOCAL_DOMAIN").mapValue(_.getOrElse("localhost"))
+  private val localDomain = env("LOCAL_DOMAIN").as[String].default("localhost")
 
-  private val httpPort = propF[F, Option[Port]]("http.port").mapValue(_.getOrElse(Port(8080)))
+  private val httpPort = prop("http.port").as[Port].default(Port(8080))
 
-  val load: F[Either[ConfigErrors, Config]] = EitherT(loadConfig(localDomain, httpPort, dbConfig)(Config.apply).result).value
+  val load: F[Either[ConfigError, Config]] = (localDomain, httpPort, dbConfig).parMapN(Config).attempt[F]
 }

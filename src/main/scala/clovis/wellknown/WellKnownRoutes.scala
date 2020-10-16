@@ -66,7 +66,7 @@ class WellKnownRoutes[F[_]: Sync](wellknownService: WellKnownService[F]) extends
               findAcceptableMediaTypes(accept, List(applicationJson, applicationXrd)).sortBy(_.qValue).lastOption match {
                 case Some(mt) if mt.mediaRange.satisfiedBy(applicationXrd)  => Ok(hm.toXML).map(_.withContentType(xrdUTF8))
                 case Some(mt) if mt.mediaRange.satisfiedBy(applicationJson) => Ok(hm.asJson.dropNulls)
-                case _                                                      => NotAcceptable(Error(s"Do not recognize 'Accept' header of '$accept'").asJson)
+                case _                                                      => NotAcceptable(Error(s"Do not recognize 'Accept' header of '${accept.toString}'").asJson)
               }
           }
         }

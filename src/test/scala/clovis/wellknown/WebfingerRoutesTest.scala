@@ -26,9 +26,11 @@ import io.circe.generic.auto._
 import org.http4s._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.implicits._
-import org.scalatest.{EitherValues, FreeSpecLike, Matchers, OptionValues}
+import org.scalatest._
+import org.scalatest.freespec.AnyFreeSpecLike
+import org.scalatest.matchers.should.Matchers
 
-class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues with EitherValues {
+class WebfingerRoutesTest extends AnyFreeSpecLike with Matchers with OptionValues with EitherValues {
   val knownAccount          = "known"
   val unknownAccount        = "unknown"
   val knownAcctURI          = new URI("/known/uri")
@@ -38,8 +40,8 @@ class WebfingerRoutesTest extends FreeSpecLike with Matchers with OptionValues w
 
   private val service = new WellKnownService[F] {
     override def webfinger(acct: String): F[Option[Webfinger]] =
-      if (acct == knownAccount) Some(Webfinger(knownAcctURI, None, None, None)).pure[F]
-      else None.pure[F]
+      if (acct == knownAccount) Option(Webfinger(knownAcctURI, None, None, None)).pure[F]
+      else Option.empty[Webfinger].pure[F]
     override def hostMeta: F[HostMeta] = HostMeta(Seq()).pure[F]
   }
 

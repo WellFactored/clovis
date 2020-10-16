@@ -20,7 +20,6 @@ package clovis
 import java.util.concurrent.Executors
 
 import cats.effect._
-import ciris.cats.effect._
 import clovis.wiring.AppWiring
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
@@ -31,7 +30,7 @@ object ClovisServer extends IOApp with TransactionSupport {
   def run(args: List[String]): IO[ExitCode] =
     configLoader.load.flatMap {
       case Left(errs) =>
-        errs.messages.foreach(System.err.println)
+        errs.messages.toList.foreach(System.err.println)
         IO.pure(ExitCode.Error)
 
       case Right(c) =>

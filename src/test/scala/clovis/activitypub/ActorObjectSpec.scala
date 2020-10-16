@@ -17,9 +17,11 @@
 
 package clovis.activitypub
 import clovis.activitypub.models.PersonActor
-import org.scalatest.{EitherValues, FreeSpecLike, Matchers}
+import org.scalatest.OptionValues
+import org.scalatest.freespec.AnyFreeSpecLike
+import org.scalatest.matchers.should.Matchers
 
-class ActorObjectSpec extends FreeSpecLike with Matchers with EitherValues {
+class ActorObjectSpec extends AnyFreeSpecLike with Matchers with OptionValues {
 
   "ActorObject.of" - {
     "valid person and host details" - {
@@ -28,9 +30,10 @@ class ActorObjectSpec extends FreeSpecLike with Matchers with EitherValues {
       val actorObjectOrError = ActorObject.of(person, hostDetails)
 
       "should successfully build an ActorObject" in { actorObjectOrError shouldBe a[Right[_, ActorObject]] }
-      val actorObject = actorObjectOrError.right.value
+
+      val actorObject = actorObjectOrError.toOption.value
       // At the moment these are the only two properties we need to check.
-      "with type of Person" in { actorObject.`type`                                                shouldBe ActorType.Person }
+      "with type of Person" in { actorObjectOrError.map(_.`type`)                                  shouldBe Right(ActorType.Person) }
       "and a preferredUsername taken from PersonActor.username" in { actorObject.preferredUsername shouldBe person.username }
     }
   }

@@ -20,8 +20,10 @@ import java.net.URI
 
 import io.circe.Json
 import org.scalatest._
+import org.scalatest.freespec.AnyFreeSpecLike
+import org.scalatest.matchers.should.Matchers
 
-class packageTest extends FreeSpecLike with Matchers with OptionValues with EitherValues {
+class packageTest extends AnyFreeSpecLike with Matchers with OptionValues with EitherValues {
   "uriDecoder" - {
     "should give an error" - {
       "when uri is None" in {
@@ -35,7 +37,10 @@ class packageTest extends FreeSpecLike with Matchers with OptionValues with Eith
 
     "should give a valid URI" in {
       val validUri = "https://local.domain"
-      uriDecoder.decodeJson(Json.fromString(validUri)).right.value shouldBe new URI(validUri)
+
+      val result = uriDecoder.decodeJson(Json.fromString(validUri))
+      result                shouldBe a[Right[_, _]]
+      result.toOption.value shouldBe new URI(validUri)
     }
   }
 }

@@ -17,9 +17,11 @@
 
 package clovis.security
 import cats.effect.IO
-import org.scalatest.{FreeSpecLike, Matchers}
+import org.scalatest._
+import org.scalatest.freespec.AnyFreeSpecLike
+import org.scalatest.matchers.should.Matchers
 
-class RSAKeyPairTest extends FreeSpecLike with Matchers {
+class RSAKeyPairTest extends AnyFreeSpecLike with Matchers {
 
   "round trip" - {
     "when we generate a keypair" - {

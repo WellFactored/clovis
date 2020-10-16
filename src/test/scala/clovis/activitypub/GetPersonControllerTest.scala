@@ -22,10 +22,12 @@ import io.circe.generic.auto._
 import io.circe.refined._
 import org.http4s.Status
 import org.http4s.circe._
-import org.scalatest.{EitherValues, FreeSpecLike, Matchers}
+import org.scalatest.OptionValues
+import org.scalatest.freespec.AnyFreeSpecLike
+import org.scalatest.matchers.should.Matchers
 
-class GetPersonControllerTest extends FreeSpecLike with Matchers with CirceEntityDecoder with EitherValues {
-  val localhost = HostDetails("localhost", isSecure = false)
+class GetPersonControllerTest extends AnyFreeSpecLike with Matchers with CirceEntityDecoder with OptionValues {
+  val localhost: HostDetails = HostDetails("localhost", isSecure = false)
   def dummyService(response: Option[PersonActor]): ActivityPubService[IO] =
     (username: String) => IO.pure(response)
 
@@ -42,7 +44,7 @@ class GetPersonControllerTest extends FreeSpecLike with Matchers with CirceEntit
       val responseBody = response.as[ActorObject].attempt.unsafeRunSync()
       "and the response should contain a valid ActorObject" in { responseBody shouldBe a[Right[_, ActorObject]] }
       "and the ActorObject should" - {
-        val actorObject = responseBody.right.value
+        val actorObject = responseBody.toOption.value
         "have a type of Person" in { actorObject.`type`                                             shouldBe ActorType.Person }
         "and its preferredUsername set to the supplied username" in { actorObject.preferredUsername shouldBe username }
       }

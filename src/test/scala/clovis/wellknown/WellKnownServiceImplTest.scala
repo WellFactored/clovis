@@ -22,9 +22,11 @@ import cats.{Id, ~>}
 import clovis.database.UserDatabase
 import clovis.database.rows._
 import clovis.security.{RSAKeyPair, RSAKeyPairGenerator}
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class WellKnownServiceImplTest extends WordSpecLike with Matchers with OptionValues {
+class WellKnownServiceImplTest extends AnyWordSpecLike with Matchers with OptionValues {
   implicit val idK: Id ~> Id = FunctionK.id[Id]
 
   private val localDomain = "test.domain"
