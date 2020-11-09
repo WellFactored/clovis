@@ -12,7 +12,7 @@ val circeVersion           = "0.13.0"
 val scalacheckVersion      = "1.15.1"
 val cirisVersion           = "1.2.1"
 val macwireVersion         = "2.3.7"
-val scalatestVersion       = "3.2.2"
+val scalatestVersion       = "3.2.3"
 val refinedVersion         = "0.9.4"
 
 organizationName := "Well-Factored Software Ltd."
