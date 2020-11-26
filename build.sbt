@@ -2,7 +2,7 @@ import sbt.addCompilerPlugin
 
 enablePlugins(JavaAppPackaging)
 
-val Http4sVersion          = "0.21.12"
+val Http4sVersion          = "0.21.13"
 val Specs2Version          = "4.2.0"
 val LogbackVersion         = "1.2.3"
 val enumeratumCirceVersion = "1.6.1"
