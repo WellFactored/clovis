@@ -24,7 +24,7 @@ lazy val root = (project in file("."))
     organization := "com.wellfactored",
     name := "clovis",
     version := "0.0.1-SNAPSHOT",
-    scalaVersion := "2.13.3",
+    scalaVersion := "2.13.5",
     libraryDependencies ++= Seq(
       "org.http4s"               %% "http4s-blaze-server" % Http4sVersion,
       "org.http4s"               %% "http4s-blaze-client" % Http4sVersion,
