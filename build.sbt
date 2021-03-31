@@ -7,7 +7,7 @@ val Specs2Version          = "4.2.0"
 val LogbackVersion         = "1.2.3"
 val enumeratumCirceVersion = "1.6.1"
 val doobieVersion          = "0.12.1"
-val log4catsVersion        = "1.2.1"
+val log4catsVersion        = "2.0.0"
 val circeVersion           = "0.13.0"
 val scalacheckVersion      = "1.15.3"
 val cirisVersion           = "1.2.1"
@@ -38,7 +38,7 @@ lazy val root = (project in file("."))
       "io.circe"                 %% "circe-refined"       % circeVersion,
       "io.estatico"              %% "newtype"             % "0.4.4",
       "org.scalacheck"           %% "scalacheck"          % scalacheckVersion % Test,
-      "org.typelevel"        %% "log4cats-slf4j"      % log4catsVersion,
+      "org.typelevel"            %% "log4cats-slf4j"      % log4catsVersion,
       "ch.qos.logback"           % "logback-classic"      % LogbackVersion,
       "com.wellfactored"         %% "property-info"       % "1.1.4",
       "com.beachape"             %% "enumeratum-circe"    % enumeratumCirceVersion,
@@ -50,9 +50,6 @@ lazy val root = (project in file("."))
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1")
   )
-
-wartremoverErrors ++= Warts.unsafe
-wartremoverErrors -= Wart.Any
 
 scalacOptions ++= Seq(
   "-deprecation",
